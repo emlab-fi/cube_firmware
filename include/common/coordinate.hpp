@@ -62,45 +62,6 @@ private:
     container data;
 };
 
-struct point {
-
-    point() = default;
-
-    point(float x, float y, float z) : coords(x, y, z) {}
-
-    point(std::initializer_list<float> input) : coords(input) {}
-
-    ~point() = default;
-
-    constexpr float operator[](std::size_t i) const {
-        return coords[i];
-    }
-
-    constexpr float& operator[](std::size_t i) {
-        return coords[i];
-    }
-
-    constexpr point& operator+=(const vec& rhs) {
-        coords += rhs.coords;
-        return *this;
-    }
-
-    constexpr point& operator-=(const vec& rhs) {
-        coords -= rhs.coords;
-        return *this;
-    }
-
-    constexpr point& operator*=(const float scalar) {
-        coords *= scalar;
-        return *this;
-    }
-
-private:
-    friend struct vec;
-    friend vec operator-(const point& p1, const point& p2);
-    coordinate coords;
-};
-
 struct vec {
 
     vec() = default;
@@ -140,9 +101,48 @@ private:
     coordinate coords;
 };
 
+struct point {
+
+    point() = default;
+
+    point(float x, float y, float z) : coords(x, y, z) {}
+
+    point(std::initializer_list<float> input) : coords(input) {}
+
+    ~point() = default;
+
+    constexpr float operator[](std::size_t i) const {
+        return coords[i];
+    }
+
+    constexpr float& operator[](std::size_t i) {
+        return coords[i];
+    }
+
+    constexpr point& operator+=(const vec& rhs) {
+        coords += rhs.coords;
+        return *this;
+    }
+
+    constexpr point& operator-=(const vec& rhs) {
+        coords -= rhs.coords;
+        return *this;
+    }
+
+    constexpr point& operator*=(const float scalar) {
+        coords *= scalar;
+        return *this;
+    }
+
+private:
+    friend struct vec;
+    friend vec operator-(const point& p1, const point& p2);
+    coordinate coords;
+};
+
+
 vec operator-(const point& p1, const point& p2) {
-    vec out;
-    out.coords = p1.coords;
+    vec out(p1[0], p1[1], p1[2]);
     out.coords -= p2.coords;
     return out;
 }
