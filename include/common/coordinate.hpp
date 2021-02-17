@@ -8,7 +8,24 @@ struct vec;
 struct point;
 
 struct coordinate {
-    using container = std::array<float, 3>;
+    static constexpr std::size_t dim = 3;
+    using container = std::array<float, dim>;
+
+    coordinate() : data({0, 0, 0}) {}
+
+    coordinate(const coordinate& other) : data(other.data) {}
+
+    coordinate(const float x, const float y, const float z) : data({x, y, z}) {}
+
+    coordinate(std::initializer_list<float> input) {
+        auto iter = input.begin();
+        for (auto i = data.begin(); i != data.end(); ++i) {
+            *i = *iter;
+            ++iter;
+        }
+    }
+
+    ~coordinate() = default;
 
     constexpr float operator[](std::size_t i) const {
         return data[i];
@@ -18,94 +35,115 @@ struct coordinate {
         return data[i];
     }
 
-    constexpr container& operator*() {
-        return data;
+    constexpr coordinate& operator+=(const coordinate& rhs) {
+        for (std::size_t i = 0; i < dim; ++i) {
+            (*this)[i] += rhs[i];
+        }
+        return *this;
     }
 
-    ~coordinate() = default;
+    constexpr coordinate& operator-=(const coordinate& rhs) {
+        for (std::size_t i = 0; i < dim; ++i) {
+            (*this)[i] -= rhs[i];
+        }
+        return *this;
+    }
+
+    constexpr coordinate& operator*=(const float scalar) {
+        for (std::size_t i = 0; i < dim; ++i) {
+            (*this)[i] *= scalar;
+        }
+        return *this;
+    }
 
 private:
     friend struct vec;
     friend struct point;
-    friend vec operator-(const point& p1, const point& p2);
-
-    container data = {0};
-
-    constexpr void internal_add(const coordinate& rhs) {
-        for (std::size_t i = 0; i < 3; ++i) {
-            (*this)[i] += rhs[i];
-        }
-    }
-
-    constexpr void internal_sub(const coordinate& rhs) {
-        for (std::size_t i = 0; i < 3; ++i) {
-            (*this)[i] -= rhs[i];
-        }
-    }
-
-    constexpr void scale(const float scalar) {
-        for (std::size_t i = 0; i < 3; ++i) {
-            (*this)[i] *= scalar;
-        }
-    }
+    container data;
 };
 
-struct point : public coordinate {
+struct point {
 
     point() = default;
 
-    point(const point& other) {
-        this->data = other.data;
-    }
+    point(float x, float y, float z) : coords(x, y, z) {}
+
+    point(std::initializer_list<float> input) : coords(input) {}
 
     ~point() = default;
 
+    constexpr float operator[](std::size_t i) const {
+        return coords[i];
+    }
+
+    constexpr float& operator[](std::size_t i) {
+        return coords[i];
+    }
+
     constexpr point& operator+=(const vec& rhs) {
-        this->internal_add(rhs);
+        coords += rhs.coords;
         return *this;
     }
 
     constexpr point& operator-=(const vec& rhs) {
-        this->internal_sub(rhs);
+        coords -= rhs.coords;
         return *this;
     }
 
-    constexpr point& operator*=(const float rhs) {
-        this->scale(rhs);
+    constexpr point& operator*=(const float scalar) {
+        coords *= scalar;
         return *this;
     }
+
+private:
+    friend struct vec;
+    friend vec operator-(const point& p1, const point& p2);
+    coordinate coords;
 };
 
-struct vec : public coordinate {
+struct vec {
 
     vec() = default;
 
-    vec(const vec& other) {
-        this->data = other.data;
-    }
+    vec(float x, float y, float z) : coords(x, y, z) {}
+
+    vec(std::initializer_list<float> input) : coords(input) {}
 
     ~vec() = default;
 
+    constexpr float operator[](std::size_t i) const {
+        return coords[i];
+    }
+
+    constexpr float& operator[](std::size_t i) {
+        return coords[i];
+    }
+
     constexpr vec& operator+=(const vec& rhs) {
-        this->internal_add(rhs);
+        coords += rhs.coords;
         return *this;
     }
 
     constexpr vec& operator-=(const vec& rhs) {
-        this->internal_sub(rhs);
+        coords -= rhs.coords;
         return *this;
     }
 
-    constexpr vec& operator*=(const float rhs) {
-        this->scale(rhs);
+    constexpr vec& operator*=(const float scalar) {
+        coords *= scalar;
         return *this;
     }
+
+private:
+    friend struct point;
+    friend vec operator-(const point& p1, const point& p2);
+    coordinate coords;
 };
 
 vec operator-(const point& p1, const point& p2) {
     vec out;
-    out.data = p1.data;
-    out.internal_sub(p2);
+    out.coords = p1.coords;
+    out.coords -= p2.coords;
     return out;
 }
 
