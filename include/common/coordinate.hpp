@@ -168,7 +168,7 @@ point operator+(point lhs, const vec& rhs) {
 }
 
 point operator-(point lhs, const vec& rhs) {
-    lhs += rhs;
+    lhs -= rhs;
     return lhs;
 }
 
