@@ -18,7 +18,7 @@ Include(FetchContent)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v2.13.1)
+    GIT_TAG        v2.13.4)
 FetchContent_GetProperties(Catch2)
 # IMPORTANT NONE: the name of the dependency is lowercase in cmake variables,
 # even if it was declared otherwise
@@ -26,6 +26,8 @@ if(NOT catch2_POPULATED)
 	FetchContent_Populate(Catch2)
     add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
 endif()
+
+
 # Explicitly enable colors in GCC/Clang – this is mainly important for the Ninja
 # builds (with makefiles the compiler is able to autodetect if it runs on
 # terminal)
@@ -34,9 +36,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 	set(COLORS "-fdiagnostics-color=always")
 endif()
 
-include_directories(./../include)
+include_directories(../include)
 
-add_executable(tests ./test_main.cpp ./test_coordinate.cpp)
+add_executable(tests test_main.cpp test_coordinate.cpp)
 target_compile_options(tests PRIVATE -Wall -Wextra -pedantic  ${COLORS})
 target_link_libraries(tests Catch2::Catch2)
 
