@@ -1,3 +1,5 @@
+#pragma once
+
 namespace cube {
 
     enum class instructions {

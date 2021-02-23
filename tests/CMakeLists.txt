@@ -36,7 +36,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 	set(COLORS "-fdiagnostics-color=always")
 endif()
 
-include_directories(../include)
+include_directories(../cube_lib/include)
 
 add_executable(tests test_main.cpp test_coordinate.cpp)
 target_compile_options(tests PRIVATE -Wall -Wextra -pedantic  ${COLORS})

@@ -140,7 +140,6 @@ private:
     coordinate coords;
 };
 
-
 vec operator-(const point& p1, const point& p2) {
     vec out(p1[0], p1[1], p1[2]);
     out.coords -= p2.coords;
