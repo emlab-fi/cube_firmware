@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <initializer_list>
+#include <compare>
 
 namespace cube {
 
@@ -26,6 +27,10 @@ struct coordinate {
     }
 
     ~coordinate() = default;
+
+    //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //friend std::strong_ordering operator<=>(const coordinate&, const coordinate&) = default;
+    //friend bool operator==(const coordinate&, const coordinate&) = default;
 
     constexpr float operator[](std::size_t i) const {
         return data[i];
@@ -72,6 +77,10 @@ struct vec {
 
     ~vec() = default;
 
+    //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //friend std::strong_ordering operator<=>(const vec&, const vec&) = default;
+    //friend bool operator==(const vec&, const vec&) = default;
+
     constexpr float operator[](std::size_t i) const {
         return coords[i];
     }
@@ -110,6 +119,10 @@ struct point {
     point(std::initializer_list<float> input) : coords(input) {}
 
     ~point() = default;
+    
+    //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //friend std::strong_ordering operator<=>(const point&, const point&) = default;
+    //friend bool operator==(const point&, const point&) = default;
 
     constexpr float operator[](std::size_t i) const {
         return coords[i];
@@ -176,6 +189,7 @@ point operator*(const float lhs, point rhs) {
     return rhs;
 }
 
+
 bool operator==(const vec& lhs, const vec& rhs) {
     for (int i = 0; i < 3; ++i) {
         if (lhs[i] != rhs[i]) {
@@ -193,6 +207,7 @@ bool operator==(const point& lhs, const point& rhs) {
     }
     return true;
 }
+
 
 //most probably mathematically incorrect, but suitable for our uses
 int operator<=>(const vec& lhs, const vec& rhs) {
