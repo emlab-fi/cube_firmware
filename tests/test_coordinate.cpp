@@ -165,7 +165,7 @@ TEST_CASE("vector operations") {
         REQUIRE(e[2] == Approx(-4.1f));
     }
     SECTION("scalar multiplication") {
-            a *= 2;
+        a *= 2;
         REQUIRE(a[0] == Approx(2.0f));
         REQUIRE(a[1] == Approx(4.0f));
         REQUIRE(a[2] == Approx(6.0f));
@@ -176,5 +176,64 @@ TEST_CASE("vector operations") {
         REQUIRE(d[1] == Approx(-4.0f));
         REQUIRE(d[2] == Approx(-6.0f));
     }
+}
 
+TEST_CASE("point comparison") {
+    cube::point zero(0.0, 0.0, 0.0);
+    cube::point pos1(1.0, 0.0, 0.0);
+    cube::point pos2(0.0, 1.0, 0.0);
+    cube::point pos3(0.0, 0.0, 1.0);
+    cube::point ones(1.0, 1.0, 1.0);
+
+    SECTION("equals") {
+        REQUIRE(zero == cube::point(0.0, 0.0, 0.0));
+        REQUIRE(ones == cube::point(1.0, 1.0, 1.0));
+    }
+    SECTION("non-equal") {
+        REQUIRE(zero != ones);
+        REQUIRE(pos1 != pos2);
+        REQUIRE(pos2 != pos3);
+    }
+    SECTION("greater") {
+        REQUIRE(ones > zero);
+        REQUIRE(pos1 > zero);
+        REQUIRE(pos2 > zero);
+        REQUIRE(pos3 > zero);
+    }
+    SECTION("less") {
+        REQUIRE(zero < ones);
+        REQUIRE(pos1 < ones);
+        REQUIRE(pos2 < ones);
+        REQUIRE(pos3 < ones);
+    }
+}
+
+TEST_CASE("vector comparison") {
+    cube::vec zero(0.0, 0.0, 0.0);
+    cube::vec pos1(1.0, 0.0, 0.0);
+    cube::vec pos2(0.0, 1.0, 0.0);
+    cube::vec pos3(0.0, 0.0, 1.0);
+    cube::vec ones(1.0, 1.0, 1.0);
+
+    SECTION("equals") {
+        REQUIRE(zero == cube::vec(0.0, 0.0, 0.0));
+        REQUIRE(ones == cube::vec(1.0, 1.0, 1.0));
+    }
+    SECTION("non-equal") {
+        REQUIRE(zero != ones);
+        REQUIRE(pos1 != pos2);
+        REQUIRE(pos2 != pos3);
+    }
+    SECTION("greater") {
+        REQUIRE(ones > zero);
+        REQUIRE(pos1 > zero);
+        REQUIRE(pos2 > zero);
+        REQUIRE(pos3 > zero);
+    }
+    SECTION("less") {
+        REQUIRE(zero < ones);
+        REQUIRE(pos1 < ones);
+        REQUIRE(pos2 < ones);
+        REQUIRE(pos3 < ones);
+    }
 }
