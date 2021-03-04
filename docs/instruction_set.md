@@ -25,7 +25,7 @@ __parameters:__  -\
 __description:__ Sets current position as the relative zero of the coordinate system.
 
 ## set_coordinate_mode
-__parameters:__  `{cartesian, polar}`\
+__parameters:__  `{cartesian, polar2d, polar3d}`\
 __description:__ Sets the coordinate mode to specified and resets the relative position to absolute zero.
 
 ## home
@@ -37,7 +37,7 @@ __parameters:__ `chip_select{0 - 3}`, `length{0-64}`, `data`\
 __description:__ Executes SPI transfer with the specified chip select. The transfer is symmetrical - `bytes in == bytes out`. The max length of the transfer is 64 bytes. Returns the transfer status and received bytes.
 
 ## i2c_transfer
-__parameters:__  `rx_length`, `tx_length`, `address`, `data`\
+__parameters:__  `rx_length{0-64}`, `tx_length{0-64}`, `address`, `data`\
 __description:__ Executes I2C transfer with the specified rx and tx length, address and sends the specified data. Returns the status of the transfer and received bytes.
 
 ## set_gpio_mode
