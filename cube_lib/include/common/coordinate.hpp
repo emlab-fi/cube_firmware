@@ -176,5 +176,47 @@ point operator*(const float lhs, point rhs) {
     return rhs;
 }
 
+bool operator==(const vec& lhs, const vec& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator==(const point& lhs, const point& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+//most probably mathematically incorrect, but suitable for our uses
+int operator<=>(const vec& lhs, const vec& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] < rhs[i]) {
+            return -1;
+        }
+        if (lhs[i] > rhs[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int operator<=>(const point& lhs, const point& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] < rhs[i]) {
+            return -1;
+        }
+        if (lhs[i] > rhs[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 } //namespace cube
