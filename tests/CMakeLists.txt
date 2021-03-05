@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-# REWRITE THIS FOR YOUR PLATFORM!!
-set(CMAKE_C_COMPILER "gcc-10")
-set(CMAKE_CXX_COMPILER "g++-10")
-
 project(cube_firmware_tests
     VERSION 1.0
     LANGUAGES CXX)
@@ -20,8 +16,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG        v2.13.4)
 FetchContent_GetProperties(Catch2)
-# IMPORTANT NONE: the name of the dependency is lowercase in cmake variables,
-# even if it was declared otherwise
 if(NOT catch2_POPULATED)
 	FetchContent_Populate(Catch2)
     add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
@@ -36,12 +30,18 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 	set(COLORS "-fdiagnostics-color=always")
 endif()
 
-include_directories(../cube_lib/include)
 
-add_executable(tests test_main.cpp test_coordinate.cpp)
+set(CUBE_LIB_DIR ../cube_lib)
+
+include_directories(${CUBE_LIB_DIR}/include)
+add_library(cube_lib ${CUBE_LIB_DIR}/source/planner.cpp ${CUBE_LIB_DIR}/source/common/coordinate.cpp)
+
+add_executable(tests test_main.cpp test_coordinate.cpp test_planner.cpp)
 target_compile_options(tests PRIVATE -Wall -Wextra -pedantic  ${COLORS})
-target_link_libraries(tests Catch2::Catch2)
+target_link_libraries(tests Catch2::Catch2 cube_lib)
 
+
+# run the tests automatically, just for convinience
 add_custom_target(run-tests ALL ./tests --use-colour yes
                     DEPENDS tests
                     COMMENT "Running tests"

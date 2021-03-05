@@ -75,6 +75,8 @@ struct vec {
 
     vec(std::initializer_list<float> input) : coords(input) {}
 
+    vec(const point& p);
+
     ~vec() = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
@@ -118,8 +120,10 @@ struct point {
 
     point(std::initializer_list<float> input) : coords(input) {}
 
+    point(const vec& v);
+
     ~point() = default;
-    
+
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
     //friend std::strong_ordering operator<=>(const point&, const point&) = default;
     //friend bool operator==(const point&, const point&) = default;
@@ -153,85 +157,28 @@ private:
     coordinate coords;
 };
 
-vec operator-(const point& p1, const point& p2) {
-    vec out(p1[0], p1[1], p1[2]);
-    out.coords -= p2.coords;
-    return out;
-}
+vec operator-(const point& p1, const point& p2);
 
-vec operator+(vec lhs, const vec& rhs) {
-    lhs += rhs;
-    return lhs;
-}
+vec operator+(vec lhs, const vec& rhs);
 
-vec operator-(vec lhs, const vec& rhs) {
-    lhs -= rhs;
-    return lhs;
-}
+vec operator-(vec lhs, const vec& rhs);
 
-vec operator*(const float lhs, vec rhs) {
-    rhs *= lhs;
-    return rhs;
-}
+vec operator*(const float lhs, vec rhs);
 
-point operator+(point lhs, const vec& rhs) {
-    lhs += rhs;
-    return lhs;
-}
+point operator+(point lhs, const vec& rhs);
 
-point operator-(point lhs, const vec& rhs) {
-    lhs -= rhs;
-    return lhs;
-}
+point operator-(point lhs, const vec& rhs);
 
-point operator*(const float lhs, point rhs) {
-    rhs *= lhs;
-    return rhs;
-}
+point operator*(const float lhs, point rhs);
 
 
-bool operator==(const vec& lhs, const vec& rhs) {
-    for (int i = 0; i < 3; ++i) {
-        if (lhs[i] != rhs[i]) {
-            return false;
-        }
-    }
-    return true;
-}
+bool operator==(const vec& lhs, const vec& rhs);
 
-bool operator==(const point& lhs, const point& rhs) {
-    for (int i = 0; i < 3; ++i) {
-        if (lhs[i] != rhs[i]) {
-            return false;
-        }
-    }
-    return true;
-}
+bool operator==(const point& lhs, const point& rhs);
 
 
-//most probably mathematically incorrect, but suitable for our uses
-int operator<=>(const vec& lhs, const vec& rhs) {
-    for (int i = 0; i < 3; ++i) {
-        if (lhs[i] < rhs[i]) {
-            return -1;
-        }
-        if (lhs[i] > rhs[i]) {
-            return 1;
-        }
-    }
-    return 0;
-}
+int operator<=>(const vec& lhs, const vec& rhs);
 
-int operator<=>(const point& lhs, const point& rhs) {
-    for (int i = 0; i < 3; ++i) {
-        if (lhs[i] < rhs[i]) {
-            return -1;
-        }
-        if (lhs[i] > rhs[i]) {
-            return 1;
-        }
-    }
-    return 0;
-}
+int operator<=>(const point& lhs, const point& rhs);
 
 } //namespace cube

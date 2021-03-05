@@ -1,14 +1,14 @@
-#include "common/planner.hpp"
 #include "common/coordinate.hpp"
+#include "planner.hpp"
 
 namespace {
 
 //for now un-implemented
-point convert_to_polar(const point& input, planner_mode mode) {
+cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) {
     return input;
 }
 
-point convert_to_cartesian(const point& input, planner_mode mode) {
+cube::point convert_to_cartesian(const cube::point& input, cube::planner_mode mode) {
     return input;
 }
 
@@ -18,11 +18,8 @@ namespace cube {
 
 planner_result planner::do_move(const point& pos) {
 
-    // convert the point to cartesian
-    point relative = pos;
-    if (mode != planner_mode::cartesian) {
-        relative = convert_to_cartesian(pos, mode);
-    }
+    // convert the point to cartesian vector
+    vec relative = vec(pos);
 
     point target = zero_pos + relative;
 
@@ -64,7 +61,7 @@ point planner::get_absolute_pos() const {
 }
 
 point planner::get_relative_pos() const {
-    point rel_pos = current_pos - zero_pos;
+    vec rel_pos = current_pos - zero_pos;
     if (mode == planner_mode::cartesian) {
         return rel_pos;
     }
