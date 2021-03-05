@@ -7,7 +7,8 @@ namespace cube {
 
 enum class planner_mode {
     cartesian,
-    polar
+    polar_2d,
+    polar_3d
 };
 
 enum class planner_machine {
@@ -18,7 +19,7 @@ enum class planner_machine {
 enum class planner_error {
     none,
     out_of_bounds,
-    misc_error
+    misc
 };
 
 struct planner_config {
@@ -31,9 +32,9 @@ struct planner_config {
 
 struct planner_result {
     planner_error err;
-    uint32_t steps_a;
-    uint32_t steps_b;
-    uint32_t steps_c;
+    int32_t steps_a;
+    int32_t steps_b;
+    int32_t steps_c;
 };
 
 
@@ -50,11 +51,11 @@ public:
           current_pos(0.0f, 0.0f, 0.0f), zero_pos(0.0f, 0.0f, 0.0f)
     {}
 
-    planner_result do_move(point target);
+    planner_result do_move(const point& target);
 
-    const point& get_absolute_pos();
+    point get_absolute_pos() const;
 
-    const point& get_relative_pos();
+    point get_relative_pos() const;
 
     void set_zero_pos() { zero_pos = current_pos; }
 
@@ -63,6 +64,8 @@ public:
     void reset_absolute_pos() { current_pos = point(0.0f, 0.f, 0.0f); }
 
     void set_config(const planner_config& new_config) { config = new_config; }
+
+    void set_mode(const planner_mode new_mode) { mode = new_mode; }
 
 };
 
