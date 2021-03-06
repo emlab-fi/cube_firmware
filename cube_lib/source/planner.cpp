@@ -19,7 +19,7 @@ namespace cube {
 planner_result planner::do_move(const point& pos) {
 
     // convert the point to cartesian vector
-    vec relative = vec(pos);
+    vec relative = static_cast<vec>(pos);
 
     point target = zero_pos + relative;
 
@@ -34,20 +34,24 @@ planner_result planner::do_move(const point& pos) {
 
     switch(config.machine) {
     case planner_machine::cartesian:
-        output.steps_a = distance[0] * config.step_resolution_x;
-        output.steps_b = distance[1] * config.step_resolution_y;
-        output.steps_c = distance[2] * config.step_resolution_z;
+        output.steps_a = distance[0] * config.step_resolution_a;
+        output.steps_b = distance[1] * config.step_resolution_b;
+        output.steps_c = distance[2] * config.step_resolution_c;
     break;
 
     case planner_machine::corexy:
-        output.steps_a = 0.5f * (distance[0] + distance[1]) * config.step_resolution_x;
-        output.steps_b = 0.5f * (distance[0] - distance[1]) * config.step_resolution_y;
-        output.steps_c = distance[2] * config.step_resolution_z;
+        output.steps_a = 0.5f * (distance[0] + distance[1]) * config.step_resolution_a;
+        output.steps_b = 0.5f * (distance[0] - distance[1]) * config.step_resolution_b;
+        output.steps_c = distance[2] * config.step_resolution_c;
     break;
 
     default:
         output.err = planner_error::misc;
     break;
+    }
+
+    if (output.err != planner_error::misc) {
+        current_pos = std::move(target);
     }
 
     return output;
@@ -63,9 +67,9 @@ point planner::get_absolute_pos() const {
 point planner::get_relative_pos() const {
     vec rel_pos = current_pos - zero_pos;
     if (mode == planner_mode::cartesian) {
-        return rel_pos;
+        return static_cast<point>(rel_pos);
     }
-    return convert_to_polar(rel_pos, mode);
+    return convert_to_polar(static_cast<point>(rel_pos), mode);
 }
 
 } //namespace cube

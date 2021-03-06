@@ -32,11 +32,18 @@ endif()
 
 
 set(CUBE_LIB_DIR ../cube_lib)
+add_library(cube_lib
+    ${CUBE_LIB_DIR}/source/planner.cpp
+    ${CUBE_LIB_DIR}/source/common/coordinate.cpp
+)
 
 include_directories(${CUBE_LIB_DIR}/include)
-add_library(cube_lib ${CUBE_LIB_DIR}/source/planner.cpp ${CUBE_LIB_DIR}/source/common/coordinate.cpp)
+add_executable(tests
+    test_main.cpp
+    test_coordinate.cpp
+    test_planner.cpp
+)
 
-add_executable(tests test_main.cpp test_coordinate.cpp test_planner.cpp)
 target_compile_options(tests PRIVATE -Wall -Wextra -pedantic  ${COLORS})
 target_link_libraries(tests Catch2::Catch2 cube_lib)
 

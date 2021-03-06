@@ -25,9 +25,9 @@ enum class planner_error {
 struct planner_config {
     planner_machine machine;
     point bounds;
-    uint32_t step_resolution_x;
-    uint32_t step_resolution_y;
-    uint32_t step_resolution_z;
+    uint32_t step_resolution_a;
+    uint32_t step_resolution_b;
+    uint32_t step_resolution_c;
 };
 
 struct planner_result {
