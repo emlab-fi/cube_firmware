@@ -4,6 +4,10 @@ namespace cube {
 
 vec::vec(const point& p) : coords(p.coords) {}
 
+vec::vec(point&& p) : coords(std::move(p.coords)) {}
+
+point::point(vec&& v) : coords(std::move(v.coords)) {}
+
 point::point(const vec& v) : coords(v.coords) {}
 
 vec operator-(const point& p1, const point& p2) {

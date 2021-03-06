@@ -237,3 +237,41 @@ TEST_CASE("vector comparison") {
         REQUIRE(pos3 < ones);
     }
 }
+
+TEST_CASE("coordinate properties") {
+    REQUIRE(std::is_trivially_copyable_v<cube::coordinate>);
+    REQUIRE(std::is_constructible_v<cube::coordinate>);
+    REQUIRE(std::is_trivially_copy_constructible_v<cube::coordinate>);
+    REQUIRE(std::is_trivially_move_constructible_v<cube::coordinate>);
+    REQUIRE(std::is_default_constructible_v<cube::coordinate>);
+    REQUIRE(std::is_trivially_assignable_v<cube::coordinate, cube::coordinate>);
+    REQUIRE(std::is_trivially_copy_assignable_v<cube::coordinate>);
+    REQUIRE(std::is_trivially_move_assignable_v<cube::coordinate>);
+    REQUIRE(std::is_trivially_destructible_v<cube::coordinate>);
+}
+
+TEST_CASE("point properties") {
+    REQUIRE(std::is_trivially_copyable_v<cube::coordinate>);
+    REQUIRE(std::is_constructible_v<cube::point>);
+    REQUIRE(std::is_trivially_copy_constructible_v<cube::point>);
+    REQUIRE(std::is_trivially_move_constructible_v<cube::point>);
+    REQUIRE(std::is_default_constructible_v<cube::point>);
+    REQUIRE(std::is_trivially_assignable_v<cube::point, cube::point>);
+    REQUIRE(std::is_trivially_copy_assignable_v<cube::point>);
+    REQUIRE(std::is_trivially_move_assignable_v<cube::point>);
+    REQUIRE(std::is_trivially_destructible_v<cube::point>);
+    REQUIRE_FALSE(std::is_assignable_v<cube::point, cube::vec>);
+}
+
+TEST_CASE("vector properties") {
+    REQUIRE(std::is_trivially_copyable_v<cube::coordinate>);
+    REQUIRE(std::is_constructible_v<cube::vec>);
+    REQUIRE(std::is_trivially_copy_constructible_v<cube::vec>);
+    REQUIRE(std::is_trivially_move_constructible_v<cube::vec>);
+    REQUIRE(std::is_default_constructible_v<cube::vec>);
+    REQUIRE(std::is_trivially_assignable_v<cube::vec, cube::vec>);
+    REQUIRE(std::is_trivially_copy_assignable_v<cube::vec>);
+    REQUIRE(std::is_trivially_move_assignable_v<cube::vec>);
+    REQUIRE(std::is_trivially_destructible_v<cube::vec>);
+    REQUIRE_FALSE(std::is_assignable_v<cube::vec, cube::point>);
+}

@@ -12,9 +12,11 @@ struct coordinate {
     static constexpr std::size_t dim = 3;
     using container = std::array<float, dim>;
 
-    coordinate() : data({0, 0, 0}) {}
+    coordinate() = default;
 
-    coordinate(const coordinate& other) : data(other.data) {}
+    coordinate(const coordinate& other) = default;
+
+    coordinate(coordinate&& other) = default;
 
     coordinate(const float x, const float y, const float z) : data({x, y, z}) {}
 
@@ -27,6 +29,10 @@ struct coordinate {
     }
 
     ~coordinate() = default;
+
+    coordinate& operator=(const coordinate& other) = default;
+
+    coordinate& operator=(coordinate&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
     //friend std::strong_ordering operator<=>(const coordinate&, const coordinate&) = default;
@@ -60,24 +66,34 @@ struct coordinate {
         }
         return *this;
     }
-
+ 
 private:
     friend struct vec;
     friend struct point;
-    container data;
+    container data{0};
 };
 
 struct vec {
 
     vec() = default;
 
+    vec(const vec& other) = default;
+
+    vec(vec&& other) = default;
+
     vec(float x, float y, float z) : coords(x, y, z) {}
 
     vec(std::initializer_list<float> input) : coords(input) {}
 
-    vec(const point& p);
+    explicit vec(const point& p);
+
+    explicit vec(point&& p);
 
     ~vec() = default;
+
+    vec& operator=(const vec& other) = default;
+
+    vec& operator=(vec&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
     //friend std::strong_ordering operator<=>(const vec&, const vec&) = default;
@@ -116,13 +132,23 @@ struct point {
 
     point() = default;
 
+    point(const point& other) = default;
+
+    point(point&& other) = default;
+
     point(float x, float y, float z) : coords(x, y, z) {}
 
     point(std::initializer_list<float> input) : coords(input) {}
 
-    point(const vec& v);
+    explicit point(const vec& v);
+
+    explicit point(vec&& v);
 
     ~point() = default;
+
+    point& operator=(const point& other) = default;
+
+    point& operator=(point&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
     //friend std::strong_ordering operator<=>(const point&, const point&) = default;
