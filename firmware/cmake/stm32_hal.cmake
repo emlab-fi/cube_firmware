@@ -51,7 +51,7 @@ function(add_hallib libname)
     target_compile_options(${libname} PUBLIC -DUSE_FULL_LL_DRIVER -D${MCU_FAMILY} -Os)
 endfunction()
 
-add_hallib(HAL ll_rcc.c ll_gpio.c)
+add_hallib(HAL ll_rcc.c ll_gpio.c ll_pwr.c ll_utils.c)
 
 
 # There is a pooled memory functionality in the library, if no values are set,

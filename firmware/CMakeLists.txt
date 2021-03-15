@@ -25,7 +25,7 @@ set(MEMORY_BLOCK_COUNT 20)
 
 project(cube_firmware C CXX ASM)
 
-set(SRC main.c)
+set(SRC main.c interrupts.c stm32g4xx_system.c)
 
 add_executable(${PROJECT_NAME}.elf ${SRC})
 target_compile_options(${PROJECT_NAME}.elf PRIVATE "-g")
