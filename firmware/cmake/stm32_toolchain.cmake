@@ -1,0 +1,42 @@
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_VERSION 1)
+
+set(TOOLCHAIN_PATH /home/loady/opt/gcc-arm-none-eabi-10-2020-q4-major)
+set(TOOLCHAIN_PREFIX arm-none-eabi-)
+
+#execute_process(
+#  COMMAND which ${TOOLCHAIN_PREFIX}gcc
+#  OUTPUT_VARIABLE BINUTILS_PATH
+#  OUTPUT_STRIP_TRAILING_WHITESPACE
+#)
+
+#get_filename_component(ARM_TOOLCHAIN_DIR ${BINUTILS_PATH} DIRECTORY)
+
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PATH}/bin/${TOOLCHAIN_PREFIX}gcc)
+set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PATH}/bin/${TOOLCHAIN_PREFIX}gcc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PATH}/bin/${TOOLCHAIN_PREFIX}g++)
+
+set(CMAKE_OBJCOPY ${TOOLCHAIN_PATH}/bin/${TOOLCHAIN_PREFIX}objcopy CACHE INTERNAL "objcopy tool")
+set(CMAKE_SIZE_UTIL ${TOOLCHAIN_PATH}/bin/${TOOLCHAIN_PREFIX}size CACHE INTERNAL "size tool")
+
+set(CMAKE_SYSROOT ${TOOLCHAIN_PATH}/arm-none-eabi)
+set(CMAKE_FIND_ROOT_PATH ${BINUTILS_PATH})
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+set(COMMON_FLAGS
+	"-mcpu=${MCU_ARCH} -mthumb -mfloat-abi=${MCU_FLOAT_ABI} -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -fno-common -fmessage-length=0 --specs=nosys.specs" )
+
+set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -fno-exceptions ")
+set(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
+
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -lc -lm -lnosys -T ${MCU_LINKER_SCRIPT}")
+set(LINKER_LANGUAGE CXX)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -gdwarf-2")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
+endif()
