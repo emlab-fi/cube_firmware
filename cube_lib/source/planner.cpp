@@ -6,8 +6,9 @@
 namespace {
 
 cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) {
-    cube::point output;
-
+    cube::point output = input;
+    //currently dissabled, as it has problems with division by 0
+    /*
     switch(mode) {
     case cube::planner_mode::cylindrical:
         output[0] = sqrtf(input[0] * input[0] + input[1] * input[1]);
@@ -22,6 +23,7 @@ cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) 
         output[2] = acosf(input[0] / sqrtf(input[0] * input[0] + input[1] * input[1]));
     break;
     }
+    */
 
     return output;
 }
