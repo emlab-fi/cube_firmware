@@ -7,8 +7,8 @@ namespace cube {
 
 enum class planner_mode {
     cartesian,
-    polar_2d,
-    polar_3d
+    cylindrical,
+    spherical
 };
 
 enum class planner_machine {
@@ -19,6 +19,7 @@ enum class planner_machine {
 enum class planner_error {
     none,
     out_of_bounds,
+    conversion_error,
     misc
 };
 

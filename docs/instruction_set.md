@@ -24,9 +24,14 @@ __description:__ Sends back current relative position in current coordinate form
 __parameters:__  -\
 __description:__ Sets current position as the relative zero of the coordinate system.
 
+## reset_zero_pos
+__parameters:__  -\
+__description:__ Resets the relative zero of the coordinate system to absolute zero.
+
+
 ## set_coordinate_mode
-__parameters:__  `{cartesian, polar2d, polar3d}`\
-__description:__ Sets the coordinate mode to specified and resets the relative position to absolute zero.
+__parameters:__  `{cartesian, cylindrical, spherical}`\
+__description:__ Sets the coordinate mode to specified.
 
 ## home
 __parameters:__  -\

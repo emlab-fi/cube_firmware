@@ -1,15 +1,53 @@
+#include <optional>
+#include <cmath>
 #include "common/coordinate.hpp"
 #include "planner.hpp"
 
 namespace {
 
-//for now un-implemented
 cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) {
-    return input;
+    cube::point output;
+
+    switch(mode) {
+    case cube::planner_mode::cylindrical:
+        output[0] = sqrtf(input[0] * input[0] + input[1] * input[1]);
+        output[1] = input[0] >= 0.0f ? (asinf(input[1] / output[0]))
+                                     : ((-asinf(input[1]) / output[0]) + M_PI);
+        output[2] = input[2];
+    break;
+
+    case cube::planner_mode::spherical:
+        output[0] = sqrtf(input[0] * input[0] + input[1] * input[1] + input[2] * input[2]);
+        output[1] = acosf(input[2] / output[0]);
+        output[2] = acosf(input[0] / sqrtf(input[0] * input[0] + input[1] * input[1]));
+    break;
+    }
+
+    return output;
 }
 
-cube::point convert_to_cartesian(const cube::point& input, cube::planner_mode mode) {
-    return input;
+std::optional<cube::point> convert_to_cartesian(const cube::point& input, cube::planner_mode mode) {
+
+    cube::point output;
+
+    switch(mode) {
+    case cube::planner_mode::cylindrical:
+        output[0] = input[0] * cosf(input[1]);
+        output[1] = input[0] * sinf(input[1]);
+        output[2] = input[2];
+    break;
+
+    case cube::planner_mode::spherical:
+        output[0] = input[0] * sinf(input[1]) * cosf(input[2]);
+        output[1] = input[0] * sinf(input[1]) * sinf(input[2]);
+        output[2] = input[0] * cosf(input[1]);
+    break;
+
+    default:
+        return {};
+    }
+
+    return output;
 }
 
 } //anonymous namespace
@@ -19,7 +57,17 @@ namespace cube {
 planner_result planner::do_move(const point& pos) {
 
     // convert the point to cartesian vector
-    vec relative = static_cast<vec>(pos);
+    vec relative;
+    if (mode != planner_mode::cartesian) {
+        auto conv_result = convert_to_cartesian(pos, mode);
+        if (!conv_result) {
+            return {planner_error::conversion_error, 0U, 0U, 0U};
+        }
+        relative = static_cast<vec>(*conv_result);
+
+    } else {
+        relative = static_cast<vec>(pos);
+    }
 
     point target = zero_pos + relative;
 
@@ -40,6 +88,7 @@ planner_result planner::do_move(const point& pos) {
     break;
 
     case planner_machine::corexy:
+        //the 0.5f should not be here? we'll see
         output.steps_a = 0.5f * (distance[0] + distance[1]) * config.step_resolution_a;
         output.steps_b = 0.5f * (distance[0] - distance[1]) * config.step_resolution_b;
         output.steps_c = distance[2] * config.step_resolution_c;

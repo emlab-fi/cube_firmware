@@ -9,6 +9,7 @@ namespace cube {
         get_abs_pos,
         get_rel_pos,
         set_zero_pos,
+        reset_zero_pos,
         set_coordinate_mode,
         home,
         spi_transfer,
