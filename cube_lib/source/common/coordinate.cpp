@@ -67,28 +67,40 @@ bool operator==(const point& lhs, const point& rhs) {
 
 
 //most probably mathematically incorrect, but suitable for our uses
-int operator<=>(const vec& lhs, const vec& rhs) {
+int operator<(const vec& lhs, const vec& rhs) {
     for (int i = 0; i < 3; ++i) {
         if (lhs[i] < rhs[i]) {
-            return -1;
-        }
-        if (lhs[i] > rhs[i]) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-int operator<=>(const point& lhs, const point& rhs) {
+int operator>(const vec& lhs, const vec& rhs) {
     for (int i = 0; i < 3; ++i) {
-        if (lhs[i] < rhs[i]) {
-            return -1;
-        }
         if (lhs[i] > rhs[i]) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
+}
+
+int operator<(const point& lhs, const point& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] < rhs[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int operator>(const point& lhs, const point& rhs) {
+    for (int i = 0; i < 3; ++i) {
+        if (lhs[i] > rhs[i]) {
+            return true;
+        }
+    }
+    return false;
 }
 
 }

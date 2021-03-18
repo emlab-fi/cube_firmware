@@ -203,8 +203,10 @@ bool operator==(const vec& lhs, const vec& rhs);
 bool operator==(const point& lhs, const point& rhs);
 
 
-int operator<=>(const vec& lhs, const vec& rhs);
+int operator<(const vec& lhs, const vec& rhs);
+int operator>(const vec& lhs, const vec& rhs);
 
-int operator<=>(const point& lhs, const point& rhs);
+int operator<(const point& lhs, const point& rhs);
+int operator>(const point& lhs, const point& rhs);
 
 } //namespace cube
