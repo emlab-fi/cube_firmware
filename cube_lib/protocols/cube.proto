@@ -65,7 +65,7 @@ message param_config {
 message command {
     uint32 id = 1;
     instruction inst = 2;
-    Oneof payload {
+    oneof payload {
         position pos = 5;
         coordinate_mode mode = 6;
         spi_transfer spi = 7;
@@ -78,7 +78,7 @@ message command {
 message reply {
     uint32 id = 1;
     status stat = 2;
-    Oneof payload {
+    oneof payload {
         position pos = 3;
         data_reply data = 4;
         bool gpio_status = 5;
