@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+//i
+enum instruction {
+    nop,
+    status,
+    move_to,
+    get_abs_pos,
+    get_rel_pos,
+    set_zero_pos,
+    reset_zero_pos,
+    set_coordinate_mode,
+    home,
+    spi_transfer,
+    i2c_transfer,
+    set_gpio_mode,
+    set_gpio,
+    get_gpio,
+    set_parameter,
+    get_parameter
+}
+
+enum coordinate_mode {
+    cartesian,
+    cylindrical,
+    spherical
+}
+
+// we use a, b, c as the position can be both cartesian
+// or spherical/cylindrical
+message position {
+    float a = 1;
+    float b = 2;
+    float c = 3;
+}
+
+message spi_transfer {
+    uint32 cs = 1;
+    uint32 length = 2;
+    bytes data = 3;
+}
+
+message i2c_transfer {
+    uint32 rx_length = 1;
+    uint32 tx_length = 2;
+    uint32 address = 3;
+    bytes data = 4;
+}
+
+message data_reply {
+    uint32 length = 1;
+    bytes data = 2;
+}
+
+message gpio_config {
+    uint32t index = 1;
+    bool value = 2;
+}
+
+message param_config {
+    uint32 id = 1;
+    uint32 value = 1;
+}
+
+//main message types
+message command {
+    uint32 id = 1;
+    instruction inst = 2;
+    Oneof payload {
+        position pos = 5;
+        coordinate_mode mode = 6;
+        spi_transfer spi = 7;
+        i2c_transfer i2c = 8;
+        gpio_config gpio = 9;
+        param_config param = 10;
+    }
+}
+
+message reply {
+    uint32 id = 1;
+    status stat = 2;
+    Oneof payload {
+        position pos = 3;
+        data_reply data = 4;
+        bool gpio_status = 5;
+        uint32 param_value = 6;
+    }
+}
+
+message status {
+    uint32 error_id = 1;
+    coordinate_mode mode = 2;
+    // more stuff to follow
+}
