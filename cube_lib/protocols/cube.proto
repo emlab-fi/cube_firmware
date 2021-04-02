@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-//i
 enum instruction {
     nop,
     status,
@@ -53,7 +52,7 @@ message data_reply {
 }
 
 message gpio_config {
-    uint32t index = 1;
+    uint32 index = 1;
     bool value = 2;
 }
 
@@ -90,5 +89,6 @@ message reply {
 message status {
     uint32 error_id = 1;
     coordinate_mode mode = 2;
+    position pos = 3;
     // more stuff to follow
 }

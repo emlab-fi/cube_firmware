@@ -1,0 +1,8 @@
+//we set the bytes fields to fixed length, so that it always gets
+//static allocation
+
+spi_transfer.data       max_size:64 fixed_length: true
+
+i2c_transfer.data       max_size:64 fixed_length: true
+
+data_reply.data         max_size:64 fixed_length: true
