@@ -35,6 +35,7 @@ struct coordinate {
     coordinate& operator=(coordinate&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //they might not act as we want them too though
     //friend std::strong_ordering operator<=>(const coordinate&, const coordinate&) = default;
     //friend bool operator==(const coordinate&, const coordinate&) = default;
 
@@ -96,6 +97,7 @@ struct vec {
     vec& operator=(vec&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //they might not act as we want them too though
     //friend std::strong_ordering operator<=>(const vec&, const vec&) = default;
     //friend bool operator==(const vec&, const vec&) = default;
 
@@ -151,6 +153,7 @@ struct point {
     point& operator=(point&& other) = default;
 
     //GCC 10 and ARM-GCC Q4-2020 cannot yet synthetize those
+    //they might not act as we want them too though
     //friend std::strong_ordering operator<=>(const point&, const point&) = default;
     //friend bool operator==(const point&, const point&) = default;
 

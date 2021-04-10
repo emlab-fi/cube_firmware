@@ -58,7 +58,7 @@ message gpio_config {
 
 message param_config {
     uint32 id = 1;
-    uint32 value = 1;
+    uint32 value = 2;
 }
 
 //main message types
@@ -79,10 +79,9 @@ message reply {
     uint32 id = 1;
     status stat = 2;
     oneof payload {
-        position pos = 3;
-        data_reply data = 4;
-        bool gpio_status = 5;
-        uint32 param_value = 6;
+        data_reply data = 3;
+        bool gpio_status = 4;
+        uint32 param_value = 5;
     }
 }
 
