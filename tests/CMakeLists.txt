@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(cube_firmware_tests
+project(CUBE_LIB_TESTS
     VERSION 1.0
     LANGUAGES CXX)
 
@@ -31,26 +31,21 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 endif()
 
 
-set(CUBE_LIB_DIR ../cube_lib)
-add_library(cube_lib
-    ${CUBE_LIB_DIR}/source/planner.cpp
-    ${CUBE_LIB_DIR}/source/common/coordinate.cpp
-)
+add_subdirectory(../cube_lib ${PROJECT_BINARY_DIR}/cube_lib)
 
-include_directories(${CUBE_LIB_DIR}/include)
-add_executable(tests
+add_executable(CUBE_LIB_TESTS
     test_main.cpp
     test_coordinate.cpp
     test_planner.cpp
 )
 
-target_compile_options(tests PRIVATE -Wall -Wextra -pedantic  ${COLORS})
-target_link_libraries(tests Catch2::Catch2 cube_lib)
+target_compile_options(CUBE_LIB_TESTS PRIVATE -Wall -Wextra -pedantic  ${COLORS})
+target_link_libraries(CUBE_LIB_TESTS Catch2::Catch2 CUBE_LIB)
 
 
 # run the tests automatically, just for convinience
-add_custom_target(run-tests ALL ./tests --use-colour yes
-                    DEPENDS tests
+add_custom_target(RUN-${PROJECT_NAME} ALL ./${PROJECT_NAME} --use-colour yes
+                    DEPENDS ${PROJECT_NAME}
                     COMMENT "Running tests"
                     WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
                     VERBATIM)
