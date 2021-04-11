@@ -45,8 +45,8 @@ struct param_config_payload {
 struct command_message {
     uint32_t id;
     instructions instr;
+    status_message status;
     std::variant<
-        point,
         planner_mode,
         spi_transfer_payload,
         i2c_transfer_payload,
