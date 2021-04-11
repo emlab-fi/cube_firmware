@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(CUBE_LIB_TESTS
+project(cube_lib_tests
     VERSION 1.0
     LANGUAGES CXX)
 
@@ -33,18 +33,18 @@ endif()
 
 add_subdirectory(../cube_lib ${PROJECT_BINARY_DIR}/cube_lib)
 
-add_executable(CUBE_LIB_TESTS
+add_executable(${PROJECT_NAME}
     test_main.cpp
     test_coordinate.cpp
     test_planner.cpp
 )
 
-target_compile_options(CUBE_LIB_TESTS PRIVATE -Wall -Wextra -pedantic  ${COLORS})
-target_link_libraries(CUBE_LIB_TESTS Catch2::Catch2 CUBE_LIB)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic  ${COLORS})
+target_link_libraries(${PROJECT_NAME} Catch2::Catch2 cube_lib)
 
 
 # run the tests automatically, just for convinience
-add_custom_target(RUN-${PROJECT_NAME} ALL ./${PROJECT_NAME} --use-colour yes
+add_custom_target(run-${PROJECT_NAME} ALL ./${PROJECT_NAME} --use-colour yes
                     DEPENDS ${PROJECT_NAME}
                     COMMENT "Running tests"
                     WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
