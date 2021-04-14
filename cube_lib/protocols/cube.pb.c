@@ -9,19 +9,19 @@
 PB_BIND(position, position, AUTO)
 
 
-PB_BIND(spi_transfer_payload, spi_transfer_payload, AUTO)
+PB_BIND(spi_transfer_submsg, spi_transfer_submsg, AUTO)
 
 
-PB_BIND(i2c_transfer_payload, i2c_transfer_payload, AUTO)
+PB_BIND(i2c_transfer_submsg, i2c_transfer_submsg, AUTO)
 
 
-PB_BIND(data_reply_payload, data_reply_payload, AUTO)
+PB_BIND(data_reply_submsg, data_reply_submsg, AUTO)
 
 
-PB_BIND(gpio_config_payload, gpio_config_payload, AUTO)
+PB_BIND(gpio_config_submsg, gpio_config_submsg, AUTO)
 
 
-PB_BIND(param_config_payload, param_config_payload, AUTO)
+PB_BIND(param_config_submsg, param_config_submsg, AUTO)
 
 
 PB_BIND(command_msg, command_msg, AUTO)
