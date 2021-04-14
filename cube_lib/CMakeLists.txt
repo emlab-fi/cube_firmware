@@ -35,11 +35,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include ${nanopb_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${nanopb_SOURCE_DIR} protocols)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
     source/common/coordinate.cpp
+    source/common/message.cpp
     source/planner.cpp
     protocols/cube.pb.c
 )

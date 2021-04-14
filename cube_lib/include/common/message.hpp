@@ -11,7 +11,8 @@ namespace cube {
 enum class message_type {
     command,
     reply,
-    status
+    status,
+    empty
 };
 
 struct spi_transfer_payload {
@@ -54,7 +55,7 @@ struct command_message {
         param_config_payload
         > payload;
 
-    //redundant, as we should never have to encode a command message
+    //redundant, as we should never have to encode a command message in cube_hw
     encoded_message encode() const {
         return {0, message_type::command, {}};
     }
@@ -69,9 +70,7 @@ struct reply_message {
         uint32_t
         > payload;
 
-    encoded_message encode() const {
-        return {0, message_type::reply, {}};
-    }
+    encoded_message encode() const;
 };
 
 struct status_message {
@@ -79,9 +78,7 @@ struct status_message {
     planner_mode mode;
     point position;
 
-    encoded_message encode() const {
-        return {0, message_type::status, {}};
-    }
+    encoded_message encode() const;
 };
 
 struct encoded_message {
@@ -89,5 +86,7 @@ struct encoded_message {
     message_type type;
     std::array<uint8_t, 256> data;
 };
+
+command_message decode_cmd_message(encoded_message& input);
 
 }//namespace cube
