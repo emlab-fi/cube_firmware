@@ -1,4 +1,5 @@
 #include <variant>
+#include <iostream>
 #include "common/message.hpp"
 #include "pb_encode.h"
 #include "cube.pb.h"
@@ -58,8 +59,22 @@ encoded_message reply_message::encode() const {
     msg.has_stat = true;
     msg.stat = fill_status_msg(status);
 
-    
+    auto index = payload.index();
 
+    if (index == 0) {
+        const data_reply_payload& rpl = std::get<0>(payload);
+        msg.which_payload = reply_msg_data_tag;
+        msg.payload.data.length = rpl.length;
+        memcpy(msg.payload.data.data, rpl.data.data(), rpl.length);
+    } else if (index == 1) {
+        bool state = std::get<1>(payload);
+        msg.which_payload = reply_msg_gpio_status_tag;
+        msg.payload.gpio_status = state;
+    } else if (index == 2) {
+        uint32_t value = std::get<2>(payload);
+        msg.which_payload = reply_msg_param_value_tag;
+        msg.payload.param_value = value;
+    }
 
     pb_ostream_t encoding_stream = pb_ostream_from_buffer(output.data.data(), output.data.max_size());
 

@@ -43,6 +43,20 @@ struct param_config_payload {
     uint32_t value;
 };
 
+struct encoded_message {
+    std::size_t length;
+    message_type type;
+    std::array<uint8_t, 256> data;
+};
+
+struct status_message {
+    uint32_t error_id;
+    planner_mode mode;
+    point position;
+
+    encoded_message encode() const;
+};
+
 struct command_message {
     uint32_t id;
     instructions instr;
@@ -71,20 +85,6 @@ struct reply_message {
         > payload;
 
     encoded_message encode() const;
-};
-
-struct status_message {
-    uint32_t error_id;
-    planner_mode mode;
-    point position;
-
-    encoded_message encode() const;
-};
-
-struct encoded_message {
-    std::size_t length;
-    message_type type;
-    std::array<uint8_t, 256> data;
 };
 
 command_message decode_cmd_message(encoded_message& input);
