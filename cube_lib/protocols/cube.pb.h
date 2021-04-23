@@ -26,14 +26,14 @@ typedef enum _instruction {
     instruction_set_gpio = 12, 
     instruction_get_gpio = 13, 
     instruction_set_parameter = 14, 
-    instruction_get_paramete = 15 
+    instruction_get_parameter = 15 
 } instruction;
 
-typedef enum _coordinate_mode { 
-    coordinate_mode_cartesian = 0, 
-    coordinate_mode_cylindrical = 1, 
-    coordinate_mode_spherical = 2 
-} coordinate_mode;
+typedef enum _coord_mode { 
+    coord_mode_cartesian = 0, 
+    coord_mode_cylindrical = 1, 
+    coord_mode_spherical = 2 
+} coord_mode;
 
 /* Struct definitions */
 typedef struct _data_reply_submsg { 
@@ -72,28 +72,27 @@ typedef struct _spi_transfer_submsg {
     pb_byte_t data[64]; 
 } spi_transfer_submsg;
 
-typedef struct _status_msg { 
-    uint32_t error_id; 
-    coordinate_mode mode; 
-    bool has_pos;
-    position pos; /* more stuff to follow */
-} status_msg;
-
 /* main message types */
 typedef struct _command_msg { 
     uint32_t id; 
     instruction inst; 
-    bool has_stat;
-    status_msg stat; 
     pb_size_t which_payload;
     union {
-        coordinate_mode mode;
+        position pos;
+        coord_mode mode;
         spi_transfer_submsg spi;
         i2c_transfer_submsg i2c;
         gpio_config_submsg gpio;
         param_config_submsg param;
     } payload; 
 } command_msg;
+
+typedef struct _status_msg { 
+    uint32_t error_id; 
+    coord_mode mode; 
+    bool has_pos;
+    position pos; /* more stuff to follow */
+} status_msg;
 
 typedef struct _reply_msg { 
     uint32_t id; 
@@ -110,12 +109,12 @@ typedef struct _reply_msg {
 
 /* Helper constants for enums */
 #define _instruction_MIN instruction_nop
-#define _instruction_MAX instruction_get_paramete
-#define _instruction_ARRAYSIZE ((instruction)(instruction_get_paramete+1))
+#define _instruction_MAX instruction_get_parameter
+#define _instruction_ARRAYSIZE ((instruction)(instruction_get_parameter+1))
 
-#define _coordinate_mode_MIN coordinate_mode_cartesian
-#define _coordinate_mode_MAX coordinate_mode_spherical
-#define _coordinate_mode_ARRAYSIZE ((coordinate_mode)(coordinate_mode_spherical+1))
+#define _coord_mode_MIN coord_mode_cartesian
+#define _coord_mode_MAX coord_mode_spherical
+#define _coord_mode_ARRAYSIZE ((coord_mode)(coord_mode_spherical+1))
 
 
 #ifdef __cplusplus
@@ -129,18 +128,18 @@ extern "C" {
 #define data_reply_submsg_init_default           {0, {0}}
 #define gpio_config_submsg_init_default          {0, 0}
 #define param_config_submsg_init_default         {0, 0}
-#define command_msg_init_default                 {0, _instruction_MIN, false, status_msg_init_default, 0, {_coordinate_mode_MIN}}
+#define command_msg_init_default                 {0, _instruction_MIN, 0, {position_init_default}}
 #define reply_msg_init_default                   {0, false, status_msg_init_default, 0, {data_reply_submsg_init_default}}
-#define status_msg_init_default                  {0, _coordinate_mode_MIN, false, position_init_default}
+#define status_msg_init_default                  {0, _coord_mode_MIN, false, position_init_default}
 #define position_init_zero                       {0, 0, 0}
 #define spi_transfer_submsg_init_zero            {0, 0, {0}}
 #define i2c_transfer_submsg_init_zero            {0, 0, 0, {0}}
 #define data_reply_submsg_init_zero              {0, {0}}
 #define gpio_config_submsg_init_zero             {0, 0}
 #define param_config_submsg_init_zero            {0, 0}
-#define command_msg_init_zero                    {0, _instruction_MIN, false, status_msg_init_zero, 0, {_coordinate_mode_MIN}}
+#define command_msg_init_zero                    {0, _instruction_MIN, 0, {position_init_zero}}
 #define reply_msg_init_zero                      {0, false, status_msg_init_zero, 0, {data_reply_submsg_init_zero}}
-#define status_msg_init_zero                     {0, _coordinate_mode_MIN, false, position_init_zero}
+#define status_msg_init_zero                     {0, _coord_mode_MIN, false, position_init_zero}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define data_reply_submsg_length_tag             1
@@ -159,17 +158,17 @@ extern "C" {
 #define spi_transfer_submsg_cs_tag               1
 #define spi_transfer_submsg_length_tag           2
 #define spi_transfer_submsg_data_tag             3
-#define status_msg_error_id_tag                  1
-#define status_msg_mode_tag                      2
-#define status_msg_pos_tag                       3
 #define command_msg_id_tag                       1
 #define command_msg_inst_tag                     2
-#define command_msg_stat_tag                     3
+#define command_msg_pos_tag                      3
 #define command_msg_mode_tag                     4
 #define command_msg_spi_tag                      5
 #define command_msg_i2c_tag                      6
 #define command_msg_gpio_tag                     7
 #define command_msg_param_tag                    8
+#define status_msg_error_id_tag                  1
+#define status_msg_mode_tag                      2
+#define status_msg_pos_tag                       3
 #define reply_msg_id_tag                         1
 #define reply_msg_stat_tag                       2
 #define reply_msg_data_tag                       3
@@ -220,7 +219,7 @@ X(a, STATIC,   SINGULAR, UINT32,   value,             2)
 #define command_msg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UINT32,   id,                1) \
 X(a, STATIC,   SINGULAR, UENUM,    inst,              2) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  stat,              3) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (payload,pos,payload.pos),   3) \
 X(a, STATIC,   ONEOF,    UENUM,    (payload,mode,payload.mode),   4) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (payload,spi,payload.spi),   5) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (payload,i2c,payload.i2c),   6) \
@@ -228,7 +227,7 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (payload,gpio,payload.gpio),   7) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (payload,param,payload.param),   8)
 #define command_msg_CALLBACK NULL
 #define command_msg_DEFAULT NULL
-#define command_msg_stat_MSGTYPE status_msg
+#define command_msg_payload_pos_MSGTYPE position
 #define command_msg_payload_spi_MSGTYPE spi_transfer_submsg
 #define command_msg_payload_i2c_MSGTYPE i2c_transfer_submsg
 #define command_msg_payload_gpio_MSGTYPE gpio_config_submsg
@@ -275,7 +274,7 @@ extern const pb_msgdesc_t status_msg_msg;
 #define status_msg_fields &status_msg_msg
 
 /* Maximum encoded size of messages (where known) */
-#define command_msg_size                         121
+#define command_msg_size                         94
 #define data_reply_submsg_size                   72
 #define gpio_config_submsg_size                  8
 #define i2c_transfer_submsg_size                 84

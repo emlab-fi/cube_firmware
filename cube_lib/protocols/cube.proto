@@ -16,10 +16,10 @@ enum instruction {
     set_gpio = 12;
     get_gpio = 13;
     set_parameter = 14;
-    get_paramete = 15;
+    get_parameter = 15;
 }
 
-enum coordinate_mode {
+enum coord_mode {
     cartesian = 0;
     cylindrical = 1;
     spherical = 2;
@@ -65,9 +65,9 @@ message param_config_submsg {
 message command_msg {
     uint32 id = 1;
     instruction inst = 2;
-    status_msg stat = 3;
     oneof payload {
-        coordinate_mode mode = 4;
+        position pos = 3;
+        coord_mode mode = 4;
         spi_transfer_submsg spi = 5;
         i2c_transfer_submsg i2c = 6;
         gpio_config_submsg gpio = 7;
@@ -87,7 +87,7 @@ message reply_msg {
 
 message status_msg {
     uint32 error_id = 1;
-    coordinate_mode mode = 2;
+    coord_mode mode = 2;
     position pos = 3;
     // more stuff to follow
 }

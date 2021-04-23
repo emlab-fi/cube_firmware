@@ -15,6 +15,13 @@ enum class message_type {
     empty
 };
 
+enum class decode_error {
+    no_error,
+    wrong_payload,
+    wrong_type,
+    pb_error
+};
+
 struct spi_transfer_payload {
     uint32_t cs;
     uint32_t length;
@@ -62,6 +69,8 @@ struct command_message {
     instructions instr;
     status_message status;
     std::variant<
+        std::monostate,
+        point,
         planner_mode,
         spi_transfer_payload,
         i2c_transfer_payload,
@@ -71,7 +80,7 @@ struct command_message {
 
     //redundant, as we should never have to encode a command message in cube_hw
     encoded_message encode() const {
-        return {0, message_type::command, {}};
+        return {0, message_type::empty, {}};
     }
 };
 
@@ -79,6 +88,7 @@ struct reply_message {
     uint32_t id;
     status_message status;
     std::variant<
+        std::monostate,
         data_reply_payload,
         bool,
         uint32_t
@@ -87,6 +97,11 @@ struct reply_message {
     encoded_message encode() const;
 };
 
-command_message decode_cmd_message(encoded_message& input);
+struct decode_return {
+    decode_error err;
+    command_message cmd;
+};
+
+decode_return decode_cmd_message(encoded_message& input);
 
 }//namespace cube
