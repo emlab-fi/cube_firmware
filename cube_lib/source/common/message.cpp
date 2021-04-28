@@ -16,13 +16,13 @@ status_msg fill_status_msg(const cube::status_message& input) {
 
     switch (input.mode) {
         case cube::planner_mode::cartesian:
-        msg.mode = coordinate_mode_cartesian;
+        msg.mode = coord_mode_cartesian;
         break;
         case cube::planner_mode::cylindrical:
-        msg.mode = coordinate_mode_cylindrical;
+        msg.mode = coord_mode_cylindrical;
         break;
         case cube::planner_mode::spherical:
-        msg.mode = coordinate_mode_spherical;
+        msg.mode = coord_mode_spherical;
         break;
     }
     return msg;
@@ -61,16 +61,16 @@ encoded_message reply_message::encode() const {
 
     auto index = payload.index();
 
-    if (index == 0) {
+    if (index == 1) {
         const data_reply_payload& rpl = std::get<data_reply_payload>(payload);
         msg.which_payload = reply_msg_data_tag;
         msg.payload.data.length = rpl.length;
         memcpy(msg.payload.data.data, rpl.data.data(), rpl.length);
-    } else if (index == 1) {
+    } else if (index == 2) {
         bool state = std::get<bool>(payload);
         msg.which_payload = reply_msg_gpio_status_tag;
         msg.payload.gpio_status = state;
-    } else if (index == 2) {
+    } else if (index == 3) {
         uint32_t value = std::get<uint32_t>(payload);
         msg.which_payload = reply_msg_param_value_tag;
         msg.payload.param_value = value;
@@ -104,54 +104,16 @@ decode_return decode_cmd_message(encoded_message& input) {
     command.id = message.id;
     command.payload = std::monostate();
 
-    switch (message.inst) {
+    command.instr = static_cast<instructions>(message.inst);
 
-    case instruction_nop:
-        command.instr = instructions::nop;
-        break;
-
-    case instruction_status_i:
-        command.instr = instructions::status;
-        break;
-    
-    case instruction_get_abs_pos:
-        command.instr = instructions::get_abs_pos;
-        break;
-
-    case instruction_get_rel_pos:
-        command.instr = instructions::get_rel_pos;
-        break;
-
-    case instruction_set_zero_pos:
-        command.instr = instructions::set_zero_pos;
-        break;
-
-    case instruction_reset_zero_pos:
-        command.instr = instructions::reset_zero_pos;
-        break;
-
-    case instruction_home:
-        command.instr = instructions::home;
-        break;
-
-    case instruction_get_gpio:
-        command.instr = instructions::get_gpio;
-        break;
-
-    case instruction_get_parameter:
-        command.instr = instructions::get_parameter;
-        break;
-
-    case instruction_move_to:
-        command.instr = instructions::move_to;
+    if (command.instr == instructions::move_to) {
         if (message.which_payload != command_msg_pos_tag) {
             return {decode_error::wrong_payload, {}};
         }
         command.payload = point(message.payload.pos.a, message.payload.pos.b, message.payload.pos.c);
-        break;
+    }
 
-    case instruction_set_coordinate_mode:
-        command.instr = instructions::set_coordinate_mode;
+    if (command.instr == instructions::set_coordinate_mode) {
         if (message.which_payload != command_msg_mode_tag) {
             return {decode_error::wrong_payload, {}};
         }
@@ -165,43 +127,53 @@ decode_return decode_cmd_message(encoded_message& input) {
             case coord_mode_spherical:
                 command.payload = planner_mode::spherical;
         };
-        break;
+    }
 
-    case instruction_spi_transfer:
-        command.instr = instructions::spi_transfer;
+    if (command.instr == instructions::spi_transfer) {
         if (message.which_payload != command_msg_spi_tag) {
             return {decode_error::wrong_payload, {}};
         }
-        break;
 
-    case instruction_i2c_transfer:
-        command.instr = instructions::i2c_transfer;
+        uint32_t cs = message.payload.spi.cs;
+        uint32_t length = message.payload.spi.length;
+
+        command.payload = spi_transfer_payload{cs, length, {0}};
+
+        auto dest = std::get<spi_transfer_payload>(command.payload).data.data();
+        auto src = message.payload.spi.data;
+        memcpy(dest, src, length);
+    }
+
+    if (command.instr == instructions::i2c_transfer) {
         if (message.which_payload != command_msg_i2c_tag) {
             return {decode_error::wrong_payload, {}};
         }
-        break;
 
-    case instruction_set_gpio_mode:
-        command.instr = instructions::set_gpio_mode;
+        uint32_t addr = message.payload.i2c.address;
+        uint32_t rx_len = message.payload.i2c.rx_length;
+        uint32_t tx_len = message.payload.i2c.tx_length;
+
+        command.payload = i2c_transfer_payload{rx_len, tx_len, addr, {0}};
+
+        auto dest = std::get<i2c_transfer_payload>(command.payload).data.data();
+        auto src = message.payload.i2c.data;
+        memcpy(dest, src, tx_len);
+    }
+
+    if (command.instr == instructions::set_gpio_mode ||
+        command.instr == instructions::set_gpio) {
         if (message.which_payload != command_msg_gpio_tag) {
             return {decode_error::wrong_payload, {}};
         }
-        break;
+        command.payload = gpio_config_payload{message.payload.gpio.index, message.payload.gpio.value};
+    }
 
-    case instruction_set_gpio:
-        command.instr = instructions::set_gpio;
-        if (message.which_payload != command_msg_gpio_tag) {
-            return {decode_error::wrong_payload, {}};
-        }
-        break;
-
-    case instruction_set_parameter:
+    if (command.instr == instructions::set_parameter) {
         command.instr = instructions::set_parameter;
         if (message.which_payload != command_msg_param_tag) {
             return {decode_error::wrong_payload, {}};
         }
-        break;
-
+        command.payload = param_config_payload{message.payload.param.id, message.payload.param.value};
     }
 
     return {decode_error::no_error, command};
