@@ -97,11 +97,7 @@ struct reply_message {
     encoded_message encode() const;
 };
 
-struct decode_return {
-    decode_error err;
-    command_message cmd;
-};
 
-decode_return decode_cmd_message(encoded_message& input);
+std::pair<decode_error, command_message> decode_cmd_message(const encoded_message& input);
 
 }//namespace cube

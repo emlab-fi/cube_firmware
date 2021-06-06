@@ -62,18 +62,18 @@ encoded_message reply_message::encode() const {
     auto index = payload.index();
 
     if (index == 1) {
-        const data_reply_payload& rpl = std::get<data_reply_payload>(payload);
+        auto rpl = std::get_if<data_reply_payload>(&payload);
         msg.which_payload = reply_msg_data_tag;
-        msg.payload.data.length = rpl.length;
-        memcpy(msg.payload.data.data, rpl.data.data(), rpl.length);
+        msg.payload.data.length = rpl->length;
+        memcpy(msg.payload.data.data, rpl->data.data(), rpl->length);
     } else if (index == 2) {
-        bool state = std::get<bool>(payload);
+        auto state = std::get_if<bool>(&payload);
         msg.which_payload = reply_msg_gpio_status_tag;
-        msg.payload.gpio_status = state;
+        msg.payload.gpio_status = *state;
     } else if (index == 3) {
-        uint32_t value = std::get<uint32_t>(payload);
+        auto value = std::get_if<uint32_t>(&payload);
         msg.which_payload = reply_msg_param_value_tag;
-        msg.payload.param_value = value;
+        msg.payload.param_value = *value;
     }
 
     pb_ostream_t encoding_stream = pb_ostream_from_buffer(output.data.data(), output.data.max_size());
@@ -88,7 +88,7 @@ encoded_message reply_message::encode() const {
 }
 
 //this function is extremely ugly, rethink how we are doing things!
-decode_return decode_cmd_message(encoded_message& input) {
+std::pair<decode_error, command_message> decode_cmd_message(const encoded_message& input) {
 
     if (input.type != message_type::command) {
         return {decode_error::wrong_type, {}};

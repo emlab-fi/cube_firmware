@@ -36,7 +36,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
-target_include_directories(${PROJECT_NAME} PRIVATE ${nanopb_SOURCE_DIR} protocols)
+target_include_directories(${PROJECT_NAME} PUBLIC ${nanopb_SOURCE_DIR} protocols)
+
+target_link_libraries(${PROJECT_NAME} nanopb_lib)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -46,6 +48,4 @@ target_sources(${PROJECT_NAME}
     protocols/cube.pb.c
 )
 
-target_link_libraries(${PROJECT_NAME} nanopb_lib)
-
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic  ${COLORS})
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic ${COLORS})
