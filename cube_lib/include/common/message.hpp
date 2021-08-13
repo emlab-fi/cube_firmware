@@ -67,7 +67,6 @@ struct status_message {
 struct command_message {
     uint32_t id;
     instructions instr;
-    status_message status;
     std::variant<
         std::monostate,
         point,
