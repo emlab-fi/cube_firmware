@@ -1,13 +1,21 @@
 #pragma once
-#include <stdint.h>
+#include <optional>
+#include <cstdint>
 #include "common/message.hpp"
 
 
-namespace cube_hardware {
+namespace cube_hw {
 
-enum class error {
+enum class status {
     no_error,
-    error
+    error,
+    msg_send_error,
+    endstop_triggered,
+    i2c_transfer_error,
+    spi_transfer_error,
+    gpio_set_error,
+    gpio_read_error,
+    gpio_wrong_mode
 };
 
 constexpr uint8_t LED0_MASK = 0x1U;
@@ -32,23 +40,23 @@ void log_error(const char * fmt, ...);
 
 void set_leds(uint8_t state);
 
-cube::encoded_message get_message();
+std::optional<cube::encoded_message> get_message();
 
-error send_message(const cube::encoded_message& msg);
+status send_message(const cube::encoded_message& msg);
 
-error do_steps(int32_t a, int32_t b, int32_t c);
+status do_steps(int32_t a, int32_t b, int32_t c);
 
-error do_velocity(int32_t a, int32_t b, int32_t c);
+status do_velocity(int32_t a, int32_t b, int32_t c);
 
-std::pair<error, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload);
+std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload);
 
-std::pair<error, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload);
+std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload);
 
-error set_gpio_mode(cube::gpio_config_payload);
+status set_gpio_mode(cube::gpio_config_payload);
 
-error set_gpio(cube::gpio_config_payload);
+status set_gpio(cube::gpio_config_payload);
 
-std::pair<error, bool> read_gpio(cube::gpio_config_payload);
+std::pair<status, bool> read_gpio(cube::gpio_config_payload);
 
 uint8_t limits_status();
 

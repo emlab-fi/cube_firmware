@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <variant>
-#include <stdint.h>
+#include <cstdint>
 #include "../planner.hpp"
 #include "instruction_set.hpp"
 #include "coordinate.hpp"

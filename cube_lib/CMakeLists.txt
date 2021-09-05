@@ -48,4 +48,4 @@ target_sources(${PROJECT_NAME}
     protocols/cube.pb.c
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -fno-expections ${COLORS})
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -fno-exceptions ${COLORS})

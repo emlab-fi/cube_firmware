@@ -2,7 +2,7 @@
 
 ## Content
 This repo will contain the following parts of Cube ecosystem:
-- `cube_lib/` contains the common parts of the firmware - motion planner, reactor, common data structures etc.
+- `cube_lib/` contains the common parts of the firmware - motion planner, controller, common data structures etc.
 - `firmware/` has the toolchain and CMake project needed to build the firmware for STM32G4 target
 - `tests/` contains unit testing for the common parts
 - `emulator/` contains the desktop emulator of Cube

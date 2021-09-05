@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include <stdint.h>
+#include <cstdint>
 #include "common/coordinate.hpp"
 
 namespace cube {

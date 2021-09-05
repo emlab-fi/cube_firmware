@@ -1,4 +1,5 @@
 #include <tuple>
+#include "common/errors.hpp"
 #include "controller.hpp"
 #include "hardware.hpp"
 
@@ -12,21 +13,20 @@ void controller::process_command(encoded_message& input) {
     }
 
     if (input.type != message_type::command) {
-        //return some kind of error about incorrect message
+        send_status(0, error_code(error::cube, error::cat::message, 1));
         return;
     }
 
-    decode_error dec_err;
-    command_message command;
-    std::tie(dec_err, command) = decode_cmd_message(input);
+    auto [dec_err, command] = decode_cmd_message(input);
+    cube_hw::log_info("Decoded new command\n");
 
     if (dec_err == decode_error::pb_error) {
-        //return decoding error
+        send_status(command.id, error_code(error::cube, error::cat::decode, 1));
         return;
     }
 
     if (dec_err == decode_error::wrong_payload) {
-        //return wrong playload error
+        send_status(command.id, error_code(error::cube, error::cat::decode, 2));
         return;
     }
 
@@ -40,7 +40,15 @@ void controller::process_command(encoded_message& input) {
         break;
 
     case instructions::move_to:
-        do_move(command.id, command.payload);
+        do_move(command.id, std::get_if<point>(&command.payload));
+        break;
+
+    case instructions::spi_transfer:
+        do_spi_transfer(command.id, std::get_if<spi_transfer_payload>(&command.payload));
+        break;
+
+    case instructions::i2c_transfer:
+        do_i2c_transfer(command.id, std::get_if<i2c_transfer_payload>(&command.payload));
         break;
 
     case instructions::get_abs_pos:
@@ -49,18 +57,17 @@ void controller::process_command(encoded_message& input) {
     case instructions::reset_zero_pos:
     case instructions::set_coordinate_mode:
     case instructions::home:
-    case instructions::spi_transfer:
-    case instructions::i2c_transfer:
     case instructions::set_gpio_mode:
     case instructions::set_gpio:
     case instructions::get_gpio:
     case instructions::set_parameter:
     case instructions::get_parameter:
-        //raise non-implemented error
+        send_status(command.id, error_code(error::cube, error::cat::misc, 2));
         return;
 
     default:
-        //fatal error
+        cube_hw::log_error("Fatal cube_lib::controller error in instr decode\n");
+        send_status(0, error_code(error::cube, error::cat::misc, 1));
         return;
     }
 
