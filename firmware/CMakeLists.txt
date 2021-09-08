@@ -12,9 +12,9 @@ stm32_fetch_hal(G4)
 find_package(CMSIS COMPONENTS STM32G474VE REQUIRED)
 find_package(HAL COMPONENTS STM32G4 REQUIRED)
 
-set(SRC main.c interrupts.c)
+set(SOURCES main.c interrupts.c)
 
-add_executable(${PROJECT_NAME} ${SRC})
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
     CMSIS::STM32::G474VE
