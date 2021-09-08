@@ -21,16 +21,6 @@ if(NOT catch2_POPULATED)
     add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
 endif()
 
-
-# Explicitly enable colors in GCC/Clang – this is mainly important for the Ninja
-# builds (with makefiles the compiler is able to autodetect if it runs on
-# terminal)
-set(COLORS "")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(COLORS "-fdiagnostics-color=always")
-endif()
-
-
 add_subdirectory(../cube_lib ${PROJECT_BINARY_DIR}/cube_lib)
 
 add_executable(${PROJECT_NAME}

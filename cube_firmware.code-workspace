@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			//Cube lib
+			"name": "Cube library",
+			"path": "cube_lib"
+		},
+		{
+			//Tests
+			"name": "Cube lib tests",
+			"path": "tests"
+		},
+		{
+			//Firmware
+			"name": "Cube firmware",
+			"path": "firmware"
+		},
+		{
+			//Emulator
+			"name": "Cube emulator",
+			"path": "emulator"
+		},
+		{
+			//Docs
+			"name": "Documentation",
+			"path": "docs"
+		}
+	]
+}
