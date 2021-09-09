@@ -3,7 +3,7 @@
 #include <variant>
 #include <cstdint>
 #include "../planner.hpp"
-#include "instruction_set.hpp"
+#include "../instruction_set.hpp"
 #include "coordinate.hpp"
 
 namespace cube {

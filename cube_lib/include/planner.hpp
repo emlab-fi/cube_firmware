@@ -68,6 +68,8 @@ public:
 
     void set_mode(const planner_mode new_mode) { mode = new_mode; }
 
+    planner_mode get_mode() const { return mode; }
+
 };
 
 } //namespace cube
