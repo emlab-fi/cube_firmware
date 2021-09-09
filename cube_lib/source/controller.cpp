@@ -1,5 +1,5 @@
 #include <tuple>
-#include "common/errors.hpp"
+#include "errors.hpp"
 #include "controller.hpp"
 #include "hardware.hpp"
 
