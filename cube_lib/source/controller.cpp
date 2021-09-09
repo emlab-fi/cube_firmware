@@ -75,16 +75,19 @@ void controller::process_command(encoded_message& input) {
 
     case instructions::set_zero_pos:
         motion_planner.set_zero_pos();
+        cube_hw::log_info("cube_lib::planner: Set zero position.\n");
         send_simple_reply(command.id, 0);
         break;
 
     case instructions::reset_zero_pos:
         motion_planner.reset_zero_pos();
+        cube_hw::log_info("cube_lib::planner: Reset zero position.\n");
         send_simple_reply(command.id, 0);
         break;
 
     case instructions::set_coordinate_mode:
         motion_planner.set_mode(*std::get_if<planner_mode>(&command.payload));
+        cube_hw::log_info("cube_lib::planner: Set new mode.\n");
         send_simple_reply(command.id, 0);
         break;
 
