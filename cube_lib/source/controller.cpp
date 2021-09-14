@@ -83,6 +83,18 @@ void controller::process_command(encoded_message& input) {
         instr_i2c_transfer(command.id, std::get_if<i2c_transfer_payload>(&command.payload));
         break;
 
+    case instructions::set_gpio_mode:
+        instr_set_gpio_mode(command.id, std::get_if<gpio_config_payload>(&command.payload));
+        break;
+
+    case instructions::set_gpio:
+        instr_set_gpio(command.id, std::get_if<gpio_config_payload>(&command.payload));
+        break;
+
+    case instructions::get_gpio:
+        instr_get_gpio(command.id, std::get_if<gpio_config_payload>(&command.payload));
+        break;
+
     case instructions::set_zero_pos:
         motion_planner.set_zero_pos();
         cube_hw::log_info("cube_lib::planner: Set zero position.\n");
@@ -110,9 +122,6 @@ void controller::process_command(encoded_message& input) {
         break;
 
     case instructions::home:
-    case instructions::set_gpio_mode:
-    case instructions::set_gpio:
-    case instructions::get_gpio:
     case instructions::set_parameter:
     case instructions::get_parameter:
         cube_hw::log_warning("cube_lib::controller: Instruction not implemented.\n");
