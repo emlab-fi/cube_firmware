@@ -1,10 +1,9 @@
 #include <tuple>
-#include "../include/errors.hpp"
-#include "../include/controller.hpp"
-#include "../include/hardware.hpp"
+#include "errors.hpp"
+#include "controller.hpp"
+#include "hardware.hpp"
 
 namespace cube {
-
 
 void controller::send_simple_reply(uint32_t id, uint32_t error) {
     reply_message msg = {
@@ -17,6 +16,19 @@ void controller::send_simple_reply(uint32_t id, uint32_t error) {
         .payload = std::monostate{}
     };
     cube_hw::log_info("cube_lib::controller: Sent reply id: %u error: %u\n", id, error);
+    cube_hw::send_message(msg.encode());
+}
+
+void controller::send_absolute_pos(uint32_t id) {
+    reply_message msg = {
+        .id = id,
+        .status = {
+            .error_id = 0,
+            .mode = motion_planner.get_mode(),
+            .position = motion_planner.get_absolute_pos()
+        },
+        .payload = std::monostate{}
+    };
     cube_hw::send_message(msg.encode());
 }
 
@@ -50,27 +62,25 @@ void controller::process_command(encoded_message& input) {
 
     switch (command.instr) {
     case instructions::nop:
+        cube_hw::log_warning("cube_lib::controller: Received nop instruction.\n");
         send_simple_reply(0, 0);
         break;
 
     case instructions::status:
+        cube_hw::log_info("cube_lib::controller: Sending status.\n");
         send_simple_reply(command.id, 0);
         break;
 
     case instructions::move_to:
-        do_move_instr(command.id, std::get_if<point>(&command.payload));
+        instr_move(command.id, std::get_if<point>(&command.payload));
         break;
 
     case instructions::spi_transfer:
-        do_spi_transfer(command.id, std::get_if<spi_transfer_payload>(&command.payload));
+        instr_spi_transfer(command.id, std::get_if<spi_transfer_payload>(&command.payload));
         break;
 
     case instructions::i2c_transfer:
-        do_i2c_transfer(command.id, std::get_if<i2c_transfer_payload>(&command.payload));
-        break;
-
-    case instructions::home:
-        do_home(command.id);
+        instr_i2c_transfer(command.id, std::get_if<i2c_transfer_payload>(&command.payload));
         break;
 
     case instructions::set_zero_pos:
@@ -92,7 +102,14 @@ void controller::process_command(encoded_message& input) {
         break;
 
     case instructions::get_abs_pos:
+        send_absolute_pos(command.id);
+        break;
+
     case instructions::get_rel_pos:
+        send_simple_reply(command.id, 0);
+        break;
+
+    case instructions::home:
     case instructions::set_gpio_mode:
     case instructions::set_gpio:
     case instructions::get_gpio:

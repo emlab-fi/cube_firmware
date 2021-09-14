@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <initializer_list>
-#include <compare>
+//#include <compare>
 
 namespace cube {
 

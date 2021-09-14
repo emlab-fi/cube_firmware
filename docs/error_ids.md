@@ -22,6 +22,9 @@
 ### category hw_transfers (+ 0x040000)
 
 ### category hw_movement (+ 0x050000)
+- 1 : error while in velocity mode
+- 2 : error while in step mode
+- 3 : unexpected endstop triggered
 
 ### category hw_gpio (+ 0x060000)
 

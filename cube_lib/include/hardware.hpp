@@ -44,13 +44,15 @@ std::optional<cube::encoded_message> get_message();
 
 status send_message(const cube::encoded_message& msg);
 
+status set_motor_power(bool enabled);
+
 status do_steps(int32_t a, int32_t b, int32_t c);
 
 status do_velocity(int32_t a, int32_t b, int32_t c);
 
-std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload);
+std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload*);
 
-std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload);
+std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload*);
 
 status set_gpio_mode(cube::gpio_config_payload);
 
@@ -60,4 +62,4 @@ std::pair<status, bool> read_gpio(cube::gpio_config_payload);
 
 uint8_t limits_status();
 
-}
+} //namespace cube_hw

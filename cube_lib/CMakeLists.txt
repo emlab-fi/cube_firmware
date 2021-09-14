@@ -1,14 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Explicitly enable colors in GCC/Clang – this is mainly important for the Ninja
-# builds (with makefiles the compiler is able to autodetect if it runs on
-# terminal)
-set(COLORS "")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(COLORS "-fdiagnostics-color=always")
-endif()
-
-
 Include(FetchContent)
 
 FetchContent_Declare(
@@ -35,8 +26,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
-target_include_directories(${PROJECT_NAME} PUBLIC ${nanopb_SOURCE_DIR} protocols)
+target_include_directories(${PROJECT_NAME} PUBLIC
+    include
+    ${nanopb_SOURCE_DIR}
+    protocols
+)
 
 target_link_libraries(${PROJECT_NAME} nanopb_lib)
 
@@ -45,6 +39,9 @@ target_sources(${PROJECT_NAME}
     source/common/coordinate.cpp
     source/common/message.cpp
     source/planner.cpp
+    source/controller.cpp
+    source/instr_move.cpp
+    source/instr_comms.cpp
     protocols/cube.pb.c
 )
 
