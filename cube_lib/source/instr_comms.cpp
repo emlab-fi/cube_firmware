@@ -115,7 +115,18 @@ void controller::instr_get_gpio(uint32_t id, gpio_config_payload* data) {
         return;
     }
 
-    send_simple_reply(id, 0);
+    reply_message msg = {
+        .id = id,
+        .status = {
+            .error_id = 0,
+            .mode = motion_planner.get_mode(),
+            .position = motion_planner.get_relative_pos()
+        },
+        .payload = result
+    };
+
+    cube_hw::send_message(msg.encode());
+    cube_hw::log_info("cube_lib::controller: GPIO read done, sent reply\n");
 }
 
 } //namespace cube
