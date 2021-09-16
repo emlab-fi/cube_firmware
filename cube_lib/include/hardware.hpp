@@ -18,13 +18,6 @@ enum class status {
     gpio_wrong_mode
 };
 
-constexpr uint8_t LED0_MASK = 0x1U;
-constexpr uint8_t LED1_MASK = 0x2U;
-constexpr uint8_t LED2_MASK = 0x4U;
-constexpr uint8_t LED3_MASK = 0x8U;
-constexpr uint8_t LED4_MASK = 0x10U;
-constexpr uint8_t LED5_MASK = 0x20U;
-
 constexpr uint8_t A_LIMIT_START = 0x1U;
 constexpr uint8_t A_LIMIT_STOP = 0x2U;
 constexpr uint8_t B_LIMIT_START = 0x4U;
@@ -37,8 +30,6 @@ void log_info(const char * fmt, ...);
 void log_warning(const char * fmt, ...);
 
 void log_error(const char * fmt, ...);
-
-void set_leds(uint8_t state);
 
 std::optional<cube::encoded_message> get_message();
 
