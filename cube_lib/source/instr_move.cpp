@@ -62,6 +62,14 @@ void controller::instr_move(uint32_t id, point* target) {
 
 
 void controller::instr_home(uint32_t id) {
+
+    cube_hw::log_warning("cube_lib::controller: basic home implementation!");
+
+    motion_planner.reset_absolute_pos();
+    motion_planner.reset_zero_pos();
+
+    send_simple_reply(id, 0);
+
     return;
 }
 

@@ -8,7 +8,7 @@
 # Error namespaces and codes
 ## namespace cube (+ 0xaa000000)
 ### category message (+ 0x010000)
-- 1 : message is not a command message 
+- 1 : message is not a command message
 
 ### category decode  (+ 0x020000)
 - 1 : decoding error
@@ -26,7 +26,14 @@
 - 2 : error while in step mode
 - 3 : unexpected endstop triggered
 
-### category hw_gpio (+ 0x060000)
+### category hw_io (+ 0x060000)
+- 1 : gpio set mode error
+- 2 : gpio wrong mode
+- 3 : gpio set error
+- 4 : gpio read error
+- 5 : gpio misc error
+- 10 : i2c error
+- 11 : spi error
 
 ### category hw_misc (+ 0x070000)
 

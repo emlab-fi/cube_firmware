@@ -14,7 +14,7 @@ constexpr uint32_t decode = 0x00'02'0000;
 constexpr uint32_t planner = 0x00'03'0000;
 constexpr uint32_t hw_transfers = 0x00'04'0000;
 constexpr uint32_t hw_movement = 0x00'05'0000;
-constexpr uint32_t hw_gpio = 0x00'06'0000;
+constexpr uint32_t hw_io = 0x00'06'0000;
 constexpr uint32_t hw_misc = 0x00'07'0000;
 constexpr uint32_t misc = 0x00'08'0000;
 

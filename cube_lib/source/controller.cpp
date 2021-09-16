@@ -29,6 +29,7 @@ void controller::send_absolute_pos(uint32_t id) {
         },
         .payload = std::monostate{}
     };
+    cube_hw::log_info("cube_lib::controller: Sent abs_pos reply id: %u");
     cube_hw::send_message(msg.encode());
 }
 
@@ -73,6 +74,10 @@ void controller::process_command(encoded_message& input) {
 
     case instructions::move_to:
         instr_move(command.id, std::get_if<point>(&command.payload));
+        break;
+
+    case instructions::home:
+        instr_home(command.id);
         break;
 
     case instructions::spi_transfer:
@@ -121,7 +126,6 @@ void controller::process_command(encoded_message& input) {
         send_simple_reply(command.id, 0);
         break;
 
-    case instructions::home:
     case instructions::set_parameter:
     case instructions::get_parameter:
         cube_hw::log_warning("cube_lib::controller: Instruction not implemented.\n");

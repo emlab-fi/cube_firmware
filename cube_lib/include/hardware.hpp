@@ -54,11 +54,11 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
 
 std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload*);
 
-status set_gpio_mode(cube::gpio_config_payload);
+status set_gpio_mode(cube::gpio_config_payload*);
 
-status set_gpio(cube::gpio_config_payload);
+status set_gpio(cube::gpio_config_payload*);
 
-std::pair<status, bool> read_gpio(cube::gpio_config_payload);
+std::pair<status, bool> read_gpio(cube::gpio_config_payload*);
 
 uint8_t limits_status();
 
