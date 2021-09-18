@@ -38,8 +38,10 @@ set(SOURCES
     source/main.cpp
     source/interrupts.cpp
     source/peripherals.cpp
-    source/cube_hw.cpp
     source/logging.cpp
+    source/gpio.cpp
+    source/communication.cpp
+    source/movement.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

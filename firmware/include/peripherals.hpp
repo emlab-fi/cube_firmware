@@ -1,9 +1,9 @@
 #pragma once
 #include "main.hpp"
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef data_uart;
+extern UART_HandleTypeDef debug_uart;
+extern UART_HandleTypeDef tmc_uart;
 
 extern I2C_HandleTypeDef hi2c3;
 

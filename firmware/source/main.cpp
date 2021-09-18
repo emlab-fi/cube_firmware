@@ -86,10 +86,7 @@ int main(void) {
 
     cube::cube_main cube_core{planner_conf};
 
-    cube_hw::log_info("System initialized! %u\n", 22341);
-    cube_hw::log_warning("Test warning! %f\n", 1.23f);
-    cube_hw::log_error("Test error! %X\n", 1997);
-    cube_hw::log_error("Test2\n");
+    cube_hw::log_info("System initialized!\n");
 
     while(1) {
       HAL_GPIO_TogglePin(DEBUG_LED6_GPIO_Port, DEBUG_LED6_Pin);

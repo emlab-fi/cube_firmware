@@ -77,7 +77,7 @@ void SysTick_Handler(void)
   */
 void USART1_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(&huart1);
+  HAL_UART_IRQHandler(&data_uart);
 }
 
 /**
@@ -85,7 +85,7 @@ void USART1_IRQHandler(void)
   */
 void USART2_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(&huart2);
+  HAL_UART_IRQHandler(&debug_uart);
 }
 
 /**
@@ -93,7 +93,7 @@ void USART2_IRQHandler(void)
   */
 void USART3_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(&huart3);
+  HAL_UART_IRQHandler(&tmc_uart);
 }
 
 /**
