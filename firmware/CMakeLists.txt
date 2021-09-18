@@ -4,6 +4,10 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stm32_gcc.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+#global compile flags, to force some arm specific flags into the linked libraries
+#not a nice solution
+add_compile_options(-g -mthumb -fno-exceptions -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nosys.specs)
+
 #get tiny_printf
 Include(FetchContent)
 
@@ -20,10 +24,6 @@ add_library(tiny_printf STATIC
     ${tinyprintf_SOURCE_DIR}/printf.c
 )
 
-#global compile flags, to force some arm specific flags into the linked libraries
-#not a nice solution
-add_compile_options(-g -mthumb -fno-exceptions -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nosys.specs)
-
 project(cube_firmware C CXX ASM)
 
 stm32_fetch_cmsis(G4)
@@ -39,6 +39,7 @@ set(SOURCES
     source/interrupts.cpp
     source/peripherals.cpp
     source/cube_hw.cpp
+    source/logging.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

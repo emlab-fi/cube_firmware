@@ -2,12 +2,6 @@
 
 namespace cube_hw {
 
-void log_info(const char * fmt, ...) { return; }
-
-void log_warning(const char * fmt, ...) { return; }
-
-void log_error(const char * fmt, ...) { return; }
-
 std::optional<cube::encoded_message> get_message() { return {}; }
 
 status send_message(const cube::encoded_message& msg) { return status::error; }
