@@ -1,10 +1,9 @@
 # Messaging
 - uses protocol buffers for schema and serialization
 - framing described later
-- 3 main messages types
+- 2 main messages types
     - Command: PC -> Cube
     - Reply: Cube -> PC
-    - Status: Cube -> PC
 
 ## Command msg
 - used for instruction Cube on what to do next
@@ -29,3 +28,7 @@
 - message type
 - length
 - message encoded by protobuff
+
+- message type:
+    - 0x01 - command
+    - 0x02 - reply

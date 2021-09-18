@@ -56,4 +56,4 @@ void log_error(const char * fmt, ...) {
     write_message('e', fmt, args);
 }
 
-} //namespace cube
+} //namespace cube_hw
