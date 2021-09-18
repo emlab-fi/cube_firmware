@@ -22,6 +22,9 @@ class controller {
 
 
 public:
+
+    controller(const planner_config& cfg) : motion_planner(cfg) {}
+
     void process_command(encoded_message& input);
 };
 

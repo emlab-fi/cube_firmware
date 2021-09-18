@@ -1,5 +1,7 @@
 #include "main.hpp"
 #include "peripherals.hpp"
+#include "config.hpp"
+#include "cube.hpp"
 
 void HAL_MspInit(void)
 {
@@ -82,10 +84,10 @@ int main(void) {
     MX_GPIO_Init();
     MX_USART2_UART_Init();
 
+    cube::cube_main cube_core{planner_conf};
+
     while(1) {
         HAL_GPIO_TogglePin(DEBUG_LED6_GPIO_Port, DEBUG_LED6_Pin);
-        HAL_Delay(2000);
-        char string[] = "hello1234\n";
-        HAL_UART_Transmit_IT(&huart2, (uint8_t*) &string, 10);
+        cube_core.main_loop();
     }
 }

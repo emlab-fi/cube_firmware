@@ -1,6 +1,5 @@
 #pragma once
 #include "main.hpp"
-extern "C" {
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
@@ -15,5 +14,3 @@ void MX_USART3_UART_Init(void);
 void MX_I2C3_Init(void);
 
 void MX_GPIO_Init(void);
-
-} //extern C
