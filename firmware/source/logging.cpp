@@ -26,7 +26,7 @@ void write_message(const char symbol, const char * fmt, va_list args) {
         return;
     }
 
-    HAL_UART_Transmit(&huart2, buffer, written, 1);
+    HAL_UART_Transmit(&debug_uart, buffer, written, 1);
 
     written = vsnprintf((char*)buffer, 256, fmt, args);
 
