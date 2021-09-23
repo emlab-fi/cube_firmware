@@ -1,9 +1,35 @@
 #include "hardware.hpp"
 #include "peripherals.hpp"
+#include "serial_buffer.hpp"
+
+static serial_buffer receive_buffer{};
+
+extern "C" {
+/*
+custom UART handler for reading bytes
+we basically just shim the regular interrupt
+*/
+void USART1_IRQHandler(void) {
+
+  //if the interrupt is RXNE, call our handler on that
+  if (__HAL_UART_GET_IT(&data_uart, UART_IT_RXNE)) {
+      uint8_t data = data_uart.Instance->RDR;
+      receive_buffer.new_byte(data);
+  }
+  //call the HAL handler to take care of errors and such
+  HAL_UART_IRQHandler(&data_uart);
+}
+
+} //extern C
 
 namespace cube_hw {
 
-std::optional<cube::encoded_message> get_message() { return {}; }
+std::optional<cube::encoded_message> get_message() {
+    if (!receive_buffer.empty()) {
+        return receive_buffer.read();
+    }
+    return {};
+}
 
 status send_message(const cube::encoded_message& msg) {
 

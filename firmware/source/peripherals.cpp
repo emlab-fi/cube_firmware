@@ -126,7 +126,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 
     /* USART1 interrupt Init */
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+    __HAL_UART_ENABLE_IT(uartHandle, UART_IT_RXNE);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
+
   }
   else if(uartHandle->Instance==USART2)
   {
