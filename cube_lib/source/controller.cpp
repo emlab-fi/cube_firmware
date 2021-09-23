@@ -29,7 +29,7 @@ void controller::send_absolute_pos(uint32_t id) {
         },
         .payload = std::monostate{}
     };
-    cube_hw::log_info("cube_lib::controller: Sent abs_pos reply id: %u");
+    cube_hw::log_info("cube_lib::controller: Sent abs_pos reply id: %u\n");
     cube_hw::send_message(msg.encode());
 }
 
@@ -41,34 +41,34 @@ void controller::process_command(encoded_message& input) {
     }
 
     if (input.type != message_type::command) {
-        cube_hw::log_error("cube_lib::controller: Message is not a command.\n");
+        cube_hw::log_error("cube_lib::controller: Message is not a command\n");
         send_simple_reply(0, error_code(error::cube, error::cat::message, 1));
         return;
     }
 
     auto [dec_err, command] = decode_cmd_message(input);
-    cube_hw::log_info("cube_lib::controller: Decoded new command.\n");
+    cube_hw::log_info("cube_lib::controller: Decoded new command\n");
 
     if (dec_err == decode_error::pb_error) {
-        cube_hw::log_error("cube_lib::controller: Decoding error.\n");
+        cube_hw::log_error("cube_lib::controller: Decoding error\n");
         send_simple_reply(command.id, error_code(error::cube, error::cat::decode, 1));
         return;
     }
 
     if (dec_err == decode_error::wrong_payload) {
-        cube_hw::log_error("cube_lib::controller: Wrong message payload.\n");
+        cube_hw::log_error("cube_lib::controller: Wrong message payload\n");
         send_simple_reply(command.id, error_code(error::cube, error::cat::decode, 2));
         return;
     }
 
     switch (command.instr) {
     case instructions::nop:
-        cube_hw::log_warning("cube_lib::controller: Received nop instruction.\n");
+        cube_hw::log_warning("cube_lib::controller: Received nop instruction\n");
         send_simple_reply(0, 0);
         break;
 
     case instructions::status:
-        cube_hw::log_info("cube_lib::controller: Sending status.\n");
+        cube_hw::log_info("cube_lib::controller: Sending status\n");
         send_simple_reply(command.id, 0);
         break;
 
@@ -102,19 +102,19 @@ void controller::process_command(encoded_message& input) {
 
     case instructions::set_zero_pos:
         motion_planner.set_zero_pos();
-        cube_hw::log_info("cube_lib::planner: Set zero position.\n");
+        cube_hw::log_info("cube_lib::planner: Set zero position\n");
         send_simple_reply(command.id, 0);
         break;
 
     case instructions::reset_zero_pos:
         motion_planner.reset_zero_pos();
-        cube_hw::log_info("cube_lib::planner: Reset zero position.\n");
+        cube_hw::log_info("cube_lib::planner: Reset zero position\n");
         send_simple_reply(command.id, 0);
         break;
 
     case instructions::set_coordinate_mode:
         motion_planner.set_mode(*std::get_if<planner_mode>(&command.payload));
-        cube_hw::log_info("cube_lib::planner: Set new mode.\n");
+        cube_hw::log_info("cube_lib::planner: Set new mode\n");
         send_simple_reply(command.id, 0);
         break;
 
@@ -128,12 +128,12 @@ void controller::process_command(encoded_message& input) {
 
     case instructions::set_parameter:
     case instructions::get_parameter:
-        cube_hw::log_warning("cube_lib::controller: Instruction not implemented.\n");
+        cube_hw::log_warning("cube_lib::controller: Instruction not implemented\n");
         send_simple_reply(command.id, error_code(error::cube, error::cat::misc, 2));
         return;
 
     default:
-        cube_hw::log_error("cube_lib::controller: Fatal error in instr decode.\n");
+        cube_hw::log_error("cube_lib::controller: Fatal error in instr decode\n");
         send_simple_reply(0, error_code(error::cube, error::cat::misc, 1));
         return;
     }

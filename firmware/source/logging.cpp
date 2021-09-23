@@ -43,17 +43,26 @@ namespace cube_hw {
 
 void log_info(const char * fmt, ...) {
     va_list args;
+
+    va_start(args, fmt);
     write_message('i', fmt, args);
+    va_end(args);
 }
 
 void log_warning(const char * fmt, ...) {
     va_list args;
+
+    va_start(args, fmt);
     write_message('w', fmt, args);
+    va_end(args);
 }
 
 void log_error(const char * fmt, ...) {
     va_list args;
+
+    va_start(args, fmt);
     write_message('e', fmt, args);
+    va_end(args);
 }
 
 } //namespace cube_hw
