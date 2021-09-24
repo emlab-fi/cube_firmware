@@ -82,13 +82,12 @@ int main(void) {
     SystemClock_Config();
 
     MX_GPIO_Init();
+    MX_I2C3_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
+    MX_USART3_UART_Init();
 
     cube::cube_main cube_core{planner_conf};
-
-    char hello[7] = "hello\n";
-    HAL_UART_Transmit(&data_uart, (uint8_t*)hello, 6, 5);
 
     cube_hw::log_info("System initialized!\n");
 
