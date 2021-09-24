@@ -4,9 +4,8 @@
 #include "printf.h"
 
 extern "C" {
-// do nothing implementation
-void _putchar(char character)
-{
+// do nothing implementation for tiny printf
+void _putchar(char character) {
   return;
 }
 
@@ -26,7 +25,7 @@ void write_message(const char symbol, const char * fmt, va_list args) {
         return;
     }
 
-    HAL_UART_Transmit(&debug_uart, buffer, written, 1);
+    HAL_UART_Transmit(&debug_uart, buffer, written, 2);
 
     written = vsnprintf((char*)buffer, 256, fmt, args);
 

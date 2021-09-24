@@ -47,7 +47,7 @@ void controller::process_command(encoded_message& input) {
     }
 
     auto [dec_err, command] = decode_cmd_message(input);
-    cube_hw::log_info("cube_lib::controller: Decoded new command\n");
+    cube_hw::log_info("cube_lib::controller: Decoded new command, raw length:%u\n", input.length);
 
     if (dec_err == decode_error::pb_error) {
         cube_hw::log_error("cube_lib::controller: Decoding error\n");
