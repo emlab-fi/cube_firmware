@@ -42,6 +42,7 @@ set(SOURCES
     source/gpio.cpp
     source/communication.cpp
     source/movement.cpp
+    source/drivers/mcp23008.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -54,6 +55,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     include
+    include/drivers
     ${tinyprintf_SOURCE_DIR}
 )
 
