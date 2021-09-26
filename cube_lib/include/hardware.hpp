@@ -31,6 +31,8 @@ void log_warning(const char * fmt, ...);
 
 void log_error(const char * fmt, ...);
 
+status init_hardware();
+
 std::optional<cube::encoded_message> get_message();
 
 status send_message(const cube::encoded_message& msg);
