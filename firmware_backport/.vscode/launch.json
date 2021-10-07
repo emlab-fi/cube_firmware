@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Firmware-backport",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/Cube_FW.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "MK64FN1M0xxx12",
+            "svdFile": "./sdk/device/MK64F12.xml",
+            "interface": "swd",
+            "ipAddress": null,
+            "serialNumber": null
+        }
+    ]
+    }
+}
+

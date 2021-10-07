@@ -71,6 +71,7 @@ void log_error(const char * fmt, ...) {
 }
 
 status init_hardware() {
+	return status::no_error;
 }
 
 std::optional<cube::encoded_message> get_message() {

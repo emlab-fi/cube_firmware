@@ -24,10 +24,10 @@ TMC429_Driver::Status SPITransfer(uint8_t* tx, uint8_t *rx, uint8_t length) {
 
 cube::planner_config planner_conf = {
         .machine = cube::planner_machine::corexy,
-        .bounds = cube::point(234.0f, 275.0f, 270.0f),
-        .step_resolution_a = 51200U,
-        .step_resolution_b = 51200U,
-        .step_resolution_c = 12800U
+        .bounds = cube::point(150.0f, 150.0f, 150.0f),
+        .step_resolution_a = 400U,
+        .step_resolution_b = 400U,
+        .step_resolution_c = 1600U
 };
 
 TMC429_Driver::Config tmc429_conf = {
@@ -40,7 +40,7 @@ TMC429_Driver::Config tmc429_conf = {
             .pmul = 163U,
             .pdiv = 6U,
             .ramp_div = 9U,
-            .pulse_div = 5U,
+            .pulse_div = 4U,
         },
         {  // Stepper 2
             .v_min = 1U,
@@ -49,7 +49,7 @@ TMC429_Driver::Config tmc429_conf = {
             .pmul = 163U,
             .pdiv = 6U,
             .ramp_div = 9U,
-            .pulse_div = 5U,
+            .pulse_div = 4U,
         },
         {  // Stepper 3
             .v_min = 1U,
@@ -58,7 +58,7 @@ TMC429_Driver::Config tmc429_conf = {
             .pmul = 163U,
             .pdiv = 7U,
             .ramp_div = 9U,
-            .pulse_div = 5U,
+            .pulse_div = 4U,
         }
     }
 };
