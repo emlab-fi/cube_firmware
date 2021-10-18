@@ -16,6 +16,11 @@
 			"path": "firmware"
 		},
 		{
+			//Firmware backport
+			"name": "Cube firmware backport",
+			"path": "firmware_backport"	
+		},
+		{
 			//Emulator
 			"name": "Cube emulator",
 			"path": "emulator"

@@ -56,6 +56,7 @@ include_directories(${ProjDirPath}/sdk/drivers)
 include_directories(${ProjDirPath}/source)
 include_directories(${ProjDirPath}/source/tiny_printf)
 include_directories(${ProjDirPath}/source/TMC429)
+include_directories(${ProjDirPath}/source/mcp23008)
 
 add_executable(Cube_FW.elf
 "${ProjDirPath}/sdk/board/board.c"
@@ -81,6 +82,7 @@ add_executable(Cube_FW.elf
 "${ProjDirPath}/source/main.cpp"
 "${ProjDirPath}/source/tiny_printf/printf.c"
 "${ProjDirPath}/source/TMC429/TMC429.cpp"
+"${ProjDirPath}/source/mcp23008/mcp23008.cpp"
 "${ProjDirPath}/source/reactor.cpp"
 )
 

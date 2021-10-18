@@ -38,7 +38,7 @@ __parameters:__  -\
 __description:__ Launches the homing procedure and resets the whole machine to absolute zero, including relative zero.
 
 ## spi_transfer
-__parameters:__ `chip_select{0 - 3}`, `length{0-64}`, `data`\
+__parameters:__ `chip_select{0 - 3}`, `mode{0  - 3}`, `length{0-64}`, `data`\
 __description:__ Executes SPI transfer with the specified chip select. The transfer is symmetrical - `bytes in == bytes out`. The max length of the transfer is 64 bytes. Returns the transfer status and received bytes.
 
 ## i2c_transfer

@@ -6,6 +6,7 @@
 #include "config.hpp"
 #include "serial_buffer.hpp"
 #include "printf.h"
+#include "mcp23008.hpp"
 
 static serial_buffer receive_buffer{};
 
@@ -21,6 +22,12 @@ void UART0_IRQHandler(void) {
 } // extern "C"
 
 namespace {
+
+void delay(int counter) {
+	for (int i = 0; i < counter; i++) {
+		__asm volatile ("nop");
+	}
+}
 
 void write_message(const char symbol, const char * fmt, va_list args) {
     uint8_t buffer[256] = {0};
@@ -41,6 +48,19 @@ void write_message(const char symbol, const char * fmt, va_list args) {
 
     UART_WriteBlocking(UART3_PERIPHERAL, buffer, written);
 }
+
+float calculate_ratio(int32_t a, int32_t b) {
+        if (a == 0 || b == 0) {
+            return 1.f;
+        }
+        int32_t abs_a = abs(a);
+        int32_t abs_b = abs(b);
+        if (abs_a > abs_b) {
+            return static_cast<float>(abs_b)/abs_a;
+        } else {
+            return static_cast<float>(abs_a)/abs_b;
+        }
+    }
 
 } //anonymous namespace
 
@@ -130,6 +150,31 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
         return status::error;
     }
 
+    float ratio = calculate_ratio(a, b);
+    log_info("cube_hw: a:b ratio is %f.3\n");
+    uint16_t va, vb;
+    uint16_t vc = tmc429_conf.steppers[2].v_max;
+
+    if (abs(a) > abs(b)) {
+        va = tmc429_conf.steppers[0].v_max;
+        vb = tmc429_conf.steppers[1].v_max * ratio;
+    } else {
+        va = tmc429_conf.steppers[0].v_max * ratio;
+        vb = tmc429_conf.steppers[1].v_max;
+    }
+    if (va == 0) {
+        va = 1;
+    }
+    if (vb == 0) {
+        vb = 1;
+    }
+
+    res = steppers_ptr->setMaxSpeed(va, vb, vc);
+    if (res != TMC429_Driver::Status::success) {
+        log_error("cube_hw: tmc429 vmax set fail\n");
+        return status::error;
+    }
+
     res = steppers_ptr->doSteps(pos_a, pos_b, pos_c);
     if (res != TMC429_Driver::Status::success) {
         log_error("cube_hw: tmc429 pos set fail\n");
@@ -148,13 +193,16 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
 }
 
 status do_velocity(int32_t a, int32_t b, int32_t c) {
+    log_info("cube_hw: velocity|a:%d b:%d c:%d\n", a, b, c);
     auto res = steppers_ptr->setMode(TMC429_Driver::RampMode::VELOCITY);
     if (res != TMC429_Driver::Status::success) {
+        log_error("cube_hw: tmc429 mode set fail\n");
         return status::error;
     }
 
     res = steppers_ptr->setSpeed(a, b, c);
     if (res != TMC429_Driver::Status::success) {
+        log_error("cube_hw: tmc429 speed set fail\n");
         return status::error;
     }
 
@@ -170,14 +218,17 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
     if (result != kStatus_Success) {
         return {status::i2c_transfer_error, {} };
     }
+    delay(1200);
     result = I2C_MasterWriteBlocking(I2C0_PERIPHERAL, msg->data.data(), msg->tx_length, kI2C_TransferNoStopFlag);
     if (result != kStatus_Success) {
         return {status::i2c_transfer_error, {} };
     }
+    delay(1200);
     result = I2C_MasterRepeatedStart(I2C0_PERIPHERAL, msg->address, kI2C_Write);
     if (result != kStatus_Success) {
         return {status::i2c_transfer_error, {} };
     }
+    delay(1200);
 
     cube::data_reply_payload reply{};
     reply.length = msg->rx_length;
@@ -186,6 +237,7 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
     if (result != kStatus_Success) {
         return {status::i2c_transfer_error, {} };
     }
+    delay(1200);
 
     for (auto item : reply.data) {
         log_info("thing_test: %u\n", item);
@@ -198,16 +250,22 @@ std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payl
     return {status::error, {}};
 }
 
-status set_gpio_mode(cube::gpio_config_payload*) {
-    return status::error;
+status set_gpio_mode(cube::gpio_config_payload* data) {
+    log_info("cube_hw: setting gpio mode: pos: %x value: %u\n", data->index, data->value);
+    constexpr MCP23008 gpio_expander{0x40};
+    return gpio_expander.set_pin_mode(data->index,data->value);
 }
 
-status set_gpio(cube::gpio_config_payload*) {
-    return status::error;
+status set_gpio(cube::gpio_config_payload* data) {
+    log_info("cube_hw: writing gpio : pos: %x value: %u\n", data->index, data->value);
+    constexpr MCP23008 gpio_expander{0x40};
+    return gpio_expander.pin_write(data->index,data->value);
 }
 
-std::pair<status, bool> read_gpio(cube::gpio_config_payload*) {
-    return {status::error, {}};
+std::pair<status, bool> read_gpio(cube::gpio_config_payload* data) {
+    log_info("cube_hw: reading : pos: %x\n", data->index, data->value);
+    constexpr MCP23008 gpio_expander{0x40};
+    return gpio_expander.pin_read(data->index);
 }
 
 uint8_t limits_status() {
@@ -230,17 +288,5 @@ uint8_t limits_status() {
 
 /*
 namespace {
-    float calculateRatio(Cube_Common::Steps_t steps) {
-        if (steps.a == 0 || steps.b == 0) {
-            return 1.f;
-        }
-        int32_t abs_a = abs(steps.a);
-        int32_t abs_b = abs(steps.b);
-        if (abs_a > abs_b) {
-            return static_cast<float>(abs_b)/abs_a;
-        } else {
-            return static_cast<float>(abs_a)/abs_b;
-        }
-    }
 }
 */
