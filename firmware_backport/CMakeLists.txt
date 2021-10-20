@@ -4,6 +4,7 @@ include(CMakeForceCompiler)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_TOOLCHAIN_FILE armgcc.cmake)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.16)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(ProjectName)
 
 # ENABLE ASM

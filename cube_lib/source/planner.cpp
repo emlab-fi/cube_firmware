@@ -11,7 +11,7 @@ cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) 
     switch(mode) {
     case cube::planner_mode::cylindrical:
         // r = sqrt(x^2 + y^2)
-        output[0] = sqrtf(input[0] * input[0] + input[1] * input[1]);
+        output[0] = hypotf(input[0], input[1]);
         // phi = atan2(y, x)
         output[1] = atan2f(input[1], input[0]);
         // z = z
@@ -22,9 +22,13 @@ cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) 
         // r = sqrt(R^2 + z^2), where R = sqrt(x^2 + y^2)
         output[0] = sqrtf(input[0] * input[0] + input[1] * input[1] + input[2] * input[2]);
         // theta = atan2(R, z)
-        output[1] = atan2f((input[0] * input[0] + input[1] * input[1]), input[2]);
+        output[1] = atan2f(hypotf(input[0], input[1]), input[2]);
         // phi = atan2(y, x)
         output[2] = atan2f(input[1], input[0]);
+    break;
+
+    default:
+        output = input;
     break;
     }
 
