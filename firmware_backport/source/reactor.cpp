@@ -151,7 +151,7 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
     }
 
     float ratio = calculate_ratio(a, b);
-    log_info("cube_hw: a:b ratio is %f.3\n");
+    log_info("cube_hw: a:b ratio is %.3f\n", ratio);
     uint16_t va, vb;
     uint16_t vc = tmc429_conf.steppers[2].v_max;
 

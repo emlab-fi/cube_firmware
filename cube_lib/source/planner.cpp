@@ -6,24 +6,27 @@
 namespace {
 
 cube::point convert_to_polar(const cube::point& input, cube::planner_mode mode) {
-    cube::point output = input;
-    //currently dissabled, as it has problems with division by 0
-    /*
+    cube::point output;
+    
     switch(mode) {
     case cube::planner_mode::cylindrical:
+        // r = sqrt(x^2 + y^2)
         output[0] = sqrtf(input[0] * input[0] + input[1] * input[1]);
-        output[1] = input[0] >= 0.0f ? (asinf(input[1] / output[0]))
-                                     : ((-asinf(input[1]) / output[0]) + M_PI);
+        // phi = atan2(y, x)
+        output[1] = atan2f(input[1], input[0]);
+        // z = z
         output[2] = input[2];
     break;
 
     case cube::planner_mode::spherical:
+        // r = sqrt(R^2 + z^2), where R = sqrt(x^2 + y^2)
         output[0] = sqrtf(input[0] * input[0] + input[1] * input[1] + input[2] * input[2]);
-        output[1] = acosf(input[2] / output[0]);
-        output[2] = acosf(input[0] / sqrtf(input[0] * input[0] + input[1] * input[1]));
+        // theta = atan2(R, z)
+        output[1] = atan2f((input[0] * input[0] + input[1] * input[1]), input[2]);
+        // phi = atan2(y, x)
+        output[2] = atan2f(input[1], input[0]);
     break;
     }
-    */
 
     return output;
 }
