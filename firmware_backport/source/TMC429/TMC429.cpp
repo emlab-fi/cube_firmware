@@ -141,7 +141,7 @@ Status TMC429::doSteps(int32_t axis1, int32_t axis2, int32_t axis3) {
         return Status::wrong_mode;
     }
 
-    uint32_t data[3] = {axis1, axis2, axis3};
+    int32_t data[3] = {axis1, axis2, axis3};
 
     for (int i = 0; i < 3; i++) {
         Status result = writeRegister(i << ADDR_PREFIX_OFFSET | X_TARGET_ADDR, twosComplement24bit(data[i])); 
@@ -157,7 +157,7 @@ Status TMC429::setSpeed(int16_t axis1, int16_t axis2, int16_t axis3) {
         return Status::wrong_mode;
     }
     
-    uint32_t data[3] = {axis1, axis2, axis3};
+    int16_t data[3] = {axis1, axis2, axis3};
 
     for (int i = 0; i < 3; i++) {
         Status result = writeRegister(i << ADDR_PREFIX_OFFSET | V_TARGET_ADDR, twosComplement12bit(data[i])); 
@@ -174,7 +174,7 @@ Status TMC429::setPosition(int32_t axis1, int32_t axis2, int32_t axis3) {
         return Status::wrong_mode;
     }
 
-    uint32_t data[3] = {axis1, axis2, axis3};
+    int32_t data[3] = {axis1, axis2, axis3};
 
     for (int i = 0; i < 3; i++) {
         Status result = writeRegister(i << ADDR_PREFIX_OFFSET | X_TARGET_ADDR, twosComplement24bit(data[i])); 

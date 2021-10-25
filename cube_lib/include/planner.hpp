@@ -70,6 +70,8 @@ public:
 
     planner_mode get_mode() const { return mode; }
 
+    planner_machine get_machine() const { return config.machine; }
+
 };
 
 } //namespace cube

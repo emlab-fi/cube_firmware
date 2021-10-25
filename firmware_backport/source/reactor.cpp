@@ -91,6 +91,8 @@ void log_error(const char * fmt, ...) {
 }
 
 status init_hardware() {
+    constexpr MCP23008 gpio_expander{0x40};
+    gpio_expander.reset_config();
 	return status::no_error;
 }
 
@@ -193,7 +195,7 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
 }
 
 status do_velocity(int32_t a, int32_t b, int32_t c) {
-    log_info("cube_hw: velocity|a:%d b:%d c:%d\n", a, b, c);
+    log_info("cube_hw: velocity|a:%d b:%d c:%d\n", a, b, c); //this print increases latency
     auto res = steppers_ptr->setMode(TMC429_Driver::RampMode::VELOCITY);
     if (res != TMC429_Driver::Status::success) {
         log_error("cube_hw: tmc429 mode set fail\n");
@@ -251,19 +253,19 @@ std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payl
 }
 
 status set_gpio_mode(cube::gpio_config_payload* data) {
-    log_info("cube_hw: setting gpio mode: pos: %x value: %u\n", data->index, data->value);
+    log_info("cube_hw: setting gpio mode: pos: %d value: %u\n", data->index, data->value);
     constexpr MCP23008 gpio_expander{0x40};
     return gpio_expander.set_pin_mode(data->index,data->value);
 }
 
 status set_gpio(cube::gpio_config_payload* data) {
-    log_info("cube_hw: writing gpio : pos: %x value: %u\n", data->index, data->value);
+    log_info("cube_hw: writing gpio : pos: %d value: %u\n", data->index, data->value);
     constexpr MCP23008 gpio_expander{0x40};
     return gpio_expander.pin_write(data->index,data->value);
 }
 
 std::pair<status, bool> read_gpio(cube::gpio_config_payload* data) {
-    log_info("cube_hw: reading : pos: %x\n", data->index, data->value);
+    log_info("cube_hw: reading gpio : pos: %d\n", data->index);
     constexpr MCP23008 gpio_expander{0x40};
     return gpio_expander.pin_read(data->index);
 }
@@ -271,13 +273,13 @@ std::pair<status, bool> read_gpio(cube::gpio_config_payload* data) {
 uint8_t limits_status() {
     uint8_t flag = 0x00;
 
-    if (GPIO_PinRead(CUBE_X_LIMIT_GPIO, CUBE_X_LIMIT_PIN) == 0) {
+    if (GPIO_PinRead(CUBE_X_LIMIT_GPIO, CUBE_X_LIMIT_PIN) == 1) {
         flag |= A_LIMIT_START;
     }
-    if (GPIO_PinRead(CUBE_Y_LIMIT_GPIO, CUBE_Y_LIMIT_PIN) == 0) {
+    if (GPIO_PinRead(CUBE_Y_LIMIT_GPIO, CUBE_Y_LIMIT_PIN) == 1) {
         flag |= B_LIMIT_START;
     }
-    if (GPIO_PinRead(CUBE_Z_LIMIT_GPIO, CUBE_Z_LIMIT_PIN) == 0) {
+    if (GPIO_PinRead(CUBE_Z_LIMIT_GPIO, CUBE_Z_LIMIT_PIN) == 1) {
         flag |= C_LIMIT_START;
     }
 

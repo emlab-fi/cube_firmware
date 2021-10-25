@@ -60,7 +60,7 @@ status MCP23008::reset_config() const {
 }
 
 status MCP23008::modify_register(uint8_t reg_addr, uint8_t index, bool value) const {
-    log_info("cube_hw: mcp23008: modifying reg: %x at pos %x\n", reg_addr, index);
+    log_info("cube_hw: mcp23008: modifying reg: %x at pos %d\n", reg_addr, index);
     uint8_t current_value = 0U;
 
     if (hal_i2c_transfer(address, &reg_addr, 1, &current_value, 1) != kStatus_Success) {
@@ -100,7 +100,7 @@ std::pair<status, bool> MCP23008::pin_read(uint8_t index) const {
     uint8_t current_value = 0U;
 
     if (hal_i2c_transfer(address, &reg_addr, 1, &current_value, 1) != kStatus_Success) {
-        log_error("cube_hw: mcp23008: register write fail\n");
+        log_error("cube_hw: mcp23008: register read fail\n");
         return {status::gpio_read_error, false};
     }
 
