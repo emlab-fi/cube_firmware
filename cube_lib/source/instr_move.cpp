@@ -169,8 +169,17 @@ void controller::instr_home(uint32_t id) {
         return;
     }
 
+    cube_hw::log_info("cube_lib::controller: resetting internal positions\n");
+    
     motion_planner.reset_absolute_pos();
     motion_planner.reset_zero_pos();
+    status = cube_hw::reset_pos();
+
+    if (status != cube_hw::status::no_error) {
+        cube_hw::log_error("cube_lib::controller: HW reset pos fail\n");
+        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 4));
+        return;
+    }
 
     cube_hw::log_info("cube_lib::controller: homing OK\n");
     send_simple_reply(id, 0);

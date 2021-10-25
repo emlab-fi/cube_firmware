@@ -43,6 +43,8 @@ status do_steps(int32_t a, int32_t b, int32_t c);
 
 status do_velocity(int32_t a, int32_t b, int32_t c);
 
+status reset_pos();
+
 std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload*);
 
 std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload*);

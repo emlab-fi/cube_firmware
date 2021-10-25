@@ -10,6 +10,10 @@
 
 static serial_buffer receive_buffer{};
 
+static volatile int32_t pos_a = 0;
+static volatile int32_t pos_b = 0;
+static volatile int32_t pos_c = 0;
+
 extern "C" {
 
 void UART0_IRQHandler(void) {
@@ -138,13 +142,10 @@ status set_motor_power(bool enabled) {
 
 status do_steps(int32_t a, int32_t b, int32_t c) {
     log_info("cube_hw: steps|a:%d b:%d c:%d\n", a, b, c);
-    static int32_t pos_a = 0;
-    static int32_t pos_b = 0;
-    static int32_t pos_c = 0;
 
-    pos_a += a;
-    pos_b += b;
-    pos_c += c;
+    pos_a = pos_a + a;
+    pos_b = pos_b + b;
+    pos_c = pos_c + c;
 
     auto res = steppers_ptr->setMode(TMC429_Driver::RampMode::POSITION);
     if (res != TMC429_Driver::Status::success) {
@@ -211,6 +212,17 @@ status do_velocity(int32_t a, int32_t b, int32_t c) {
     return status::no_error;
 }
 
+status reset_pos() {
+    log_info("Resetting internal HW position\n");
+    pos_a = 0;
+    pos_b = 0;
+    pos_c = 0;
+    auto res = steppers_ptr->setPosition(0, 0, 0);
+    if (res != TMC429_Driver::Status::success) {
+        log_error("cube_hw: tmc429 pos set fail\n");
+        return status::error;
+    }
+}
 
 std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload* msg) {
     log_info("cube_hw: i2c transfer - addr: %x tx_len: %u rx_len: %u\n", msg->address, msg->tx_length, msg->rx_length);
