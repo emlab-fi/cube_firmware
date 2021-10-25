@@ -24,6 +24,7 @@ enum class decode_error {
 
 struct spi_transfer_payload {
     uint32_t cs;
+    uint32_t mode;
     uint32_t length;
     std::array<uint8_t, 64> data;
 };

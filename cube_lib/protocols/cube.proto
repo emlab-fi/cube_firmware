@@ -36,7 +36,8 @@ message position {
 message spi_transfer_submsg {
     uint32 cs = 1;
     uint32 length = 2;
-    bytes data = 3;
+    uint32 mode = 3;
+    bytes data = 4;
 }
 
 message i2c_transfer_submsg {

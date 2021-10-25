@@ -136,8 +136,9 @@ std::pair<decode_error, command_message> decode_cmd_message(const encoded_messag
 
         uint32_t cs = message.payload.spi.cs;
         uint32_t length = message.payload.spi.length;
+        uint32_t mode = message.payload.spi.mode;
 
-        command.payload = spi_transfer_payload{cs, length, {0}};
+        command.payload = spi_transfer_payload{cs, mode, length, {0}};
 
         auto dest = std::get<spi_transfer_payload>(command.payload).data.data();
         auto src = message.payload.spi.data;

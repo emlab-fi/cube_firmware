@@ -69,6 +69,7 @@ typedef struct _position {
 typedef struct _spi_transfer_submsg { 
     uint32_t cs; 
     uint32_t length; 
+    uint32_t mode; 
     pb_byte_t data[64]; 
 } spi_transfer_submsg;
 
@@ -123,7 +124,7 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define position_init_default                    {0, 0, 0}
-#define spi_transfer_submsg_init_default         {0, 0, {0}}
+#define spi_transfer_submsg_init_default         {0, 0, 0, {0}}
 #define i2c_transfer_submsg_init_default         {0, 0, 0, {0}}
 #define data_reply_submsg_init_default           {0, {0}}
 #define gpio_config_submsg_init_default          {0, 0}
@@ -132,7 +133,7 @@ extern "C" {
 #define reply_msg_init_default                   {0, false, status_msg_init_default, 0, {data_reply_submsg_init_default}}
 #define status_msg_init_default                  {0, _coord_mode_MIN, false, position_init_default}
 #define position_init_zero                       {0, 0, 0}
-#define spi_transfer_submsg_init_zero            {0, 0, {0}}
+#define spi_transfer_submsg_init_zero            {0, 0, 0, {0}}
 #define i2c_transfer_submsg_init_zero            {0, 0, 0, {0}}
 #define data_reply_submsg_init_zero              {0, {0}}
 #define gpio_config_submsg_init_zero             {0, 0}
@@ -157,7 +158,8 @@ extern "C" {
 #define position_c_tag                           3
 #define spi_transfer_submsg_cs_tag               1
 #define spi_transfer_submsg_length_tag           2
-#define spi_transfer_submsg_data_tag             3
+#define spi_transfer_submsg_mode_tag             3
+#define spi_transfer_submsg_data_tag             4
 #define command_msg_id_tag                       1
 #define command_msg_inst_tag                     2
 #define command_msg_pos_tag                      3
@@ -186,7 +188,8 @@ X(a_, STATIC,   SINGULAR, FLOAT,    c,                 3)
 #define spi_transfer_submsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UINT32,   cs,                1) \
 X(a, STATIC,   SINGULAR, UINT32,   length,            2) \
-X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, data,              3)
+X(a, STATIC,   SINGULAR, UINT32,   mode,              3) \
+X(a, STATIC,   SINGULAR, FIXED_LENGTH_BYTES, data,              4)
 #define spi_transfer_submsg_CALLBACK NULL
 #define spi_transfer_submsg_DEFAULT NULL
 
@@ -281,7 +284,7 @@ extern const pb_msgdesc_t status_msg_msg;
 #define param_config_submsg_size                 12
 #define position_size                            15
 #define reply_msg_size                           107
-#define spi_transfer_submsg_size                 78
+#define spi_transfer_submsg_size                 84
 #define status_msg_size                          25
 
 #ifdef __cplusplus
