@@ -17,21 +17,29 @@ status_t hal_i2c_transfer(const uint8_t addr, const uint8_t* tx, const uint8_t t
     status_t result;
     result = I2C_MasterStart(I2C0_PERIPHERAL, addr, kI2C_Write);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return result;
     }
     delay(1200);
     result = I2C_MasterWriteBlocking(I2C0_PERIPHERAL, tx, tx_len, kI2C_TransferNoStopFlag);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return result;
     }
     delay(1200);
     result = I2C_MasterRepeatedStart(I2C0_PERIPHERAL, addr, kI2C_Read);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return result;
     }
     delay(1200);
     result = I2C_MasterReadBlocking(I2C0_PERIPHERAL, rx, rx_len, kI2C_TransferDefaultFlag);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return result;
     }
     delay(1200);

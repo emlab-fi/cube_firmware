@@ -307,19 +307,19 @@ void CUBE_SPIPins(void);
   @{ */
 
 /* Symbols to be used with PORT driver */
-#define CUBE_UART3PINS_DEVUART_RX_PORT PORTB                /*!<@brief PORT peripheral base pointer */
-#define CUBE_UART3PINS_DEVUART_RX_PIN 10U                   /*!<@brief PORT pin number */
-#define CUBE_UART3PINS_DEVUART_RX_PIN_MASK (1U << 10U)      /*!<@brief PORT pin mask */
-                                                            /* @} */
+#define CUBE_UART3_RX_PORT PORTB                /*!<@brief PORT peripheral base pointer */
+#define CUBE_UART3_RX_PIN 10U                   /*!<@brief PORT pin number */
+#define CUBE_UART3_RX_PIN_MASK (1U << 10U)      /*!<@brief PORT pin mask */
+                                                /* @} */
 
 /*! @name PORTB11 (number 59), J4[8]
   @{ */
 
 /* Symbols to be used with PORT driver */
-#define CUBE_UART3PINS_DEVUART_TX_PORT PORTB                /*!<@brief PORT peripheral base pointer */
-#define CUBE_UART3PINS_DEVUART_TX_PIN 11U                   /*!<@brief PORT pin number */
-#define CUBE_UART3PINS_DEVUART_TX_PIN_MASK (1U << 11U)      /*!<@brief PORT pin mask */
-                                                            /* @} */
+#define CUBE_UART3_TX_PORT PORTB                /*!<@brief PORT peripheral base pointer */
+#define CUBE_UART3_TX_PIN 11U                   /*!<@brief PORT pin number */
+#define CUBE_UART3_TX_PIN_MASK (1U << 11U)      /*!<@brief PORT pin mask */
+                                                /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

@@ -7,11 +7,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v8.0
+product: Pins v10.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 8.0.1
+processor_version: 10.0.0
 board: FRDM-K64F
 pin_labels:
 - {pin_num: '90', pin_signal: PTC16/UART3_RX/ENET0_1588_TMR0/FB_CS5_b/FB_TSIZ1/FB_BE23_16_BLS15_8_b, label: 'J1[2]', identifier: TMR_1588_0;Z_LIMIT}
@@ -33,8 +33,8 @@ pin_labels:
 - {pin_num: '94', pin_signal: ADC0_SE5b/PTD1/SPI0_SCK/UART2_CTS_b/FTM3_CH1/FB_CS0_b, label: 'J2[12]', identifier: SPI_CLK}
 - {pin_num: '32', pin_signal: ADC0_SE18/PTE25/UART4_RX/I2C0_SDA/EWM_IN, label: 'J2[18]/U8[6]/I2C0_SDA', identifier: ACCEL_SDA;I2C_SDA}
 - {pin_num: '31', pin_signal: ADC0_SE17/PTE24/UART4_TX/I2C0_SCL/EWM_OUT_b, label: 'J2[20]/U8[4]/I2C0_SCL', identifier: ACCEL_SCL;I2C_SCL}
-- {pin_num: '58', pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1, label: 'J4[6]', identifier: DEVUART_RX}
-- {pin_num: '59', pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2, label: 'J4[8]', identifier: DEVUART_TX}
+- {pin_num: '58', pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1, label: 'J4[6]', identifier: UART3_RX}
+- {pin_num: '59', pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2, label: 'J4[8]', identifier: UART3_TX}
 - {pin_num: '82', pin_signal: ADC1_SE6b/PTC10/I2C1_SCL/FTM3_CH6/I2S0_RX_FS/FB_AD5, label: 'J4[12]', identifier: TOGGLE}
 - {pin_num: '85', pin_signal: PTC13/UART4_CTS_b/FB_AD26, label: 'U8[11]/SW2', identifier: ACCEL_INT2}
 - {pin_num: '62', pin_signal: PTB16/SPI1_SOUT/UART0_RX/FTM_CLKIN0/FB_AD17/EWM_IN, label: 'U7[4]/UART0_RX', identifier: DEBUG_UART_RX;UART0_RX}
@@ -463,7 +463,7 @@ void CUBE_SPIPins(void)
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 CUBE_UART3Pins:
-- options: {callFromInitBoot: 'true', coreID: core0, enableClock: 'true'}
+- options: {callFromInitBoot: 'true', prefix: CUBE_, coreID: core0, enableClock: 'true'}
 - pin_list:
   - {pin_num: '58', peripheral: UART3, signal: RX, pin_signal: ADC1_SE14/PTB10/SPI1_PCS0/UART3_RX/FB_AD19/FTM0_FLT1}
   - {pin_num: '59', peripheral: UART3, signal: TX, pin_signal: ADC1_SE15/PTB11/SPI1_SCK/UART3_TX/FB_AD18/FTM0_FLT2, direction: OUTPUT}
@@ -483,10 +483,10 @@ void CUBE_UART3Pins(void)
     CLOCK_EnableClock(kCLOCK_PortB);
 
     /* PORTB10 (pin 58) is configured as UART3_RX */
-    PORT_SetPinMux(CUBE_UART3PINS_DEVUART_RX_PORT, CUBE_UART3PINS_DEVUART_RX_PIN, kPORT_MuxAlt3);
+    PORT_SetPinMux(CUBE_UART3_RX_PORT, CUBE_UART3_RX_PIN, kPORT_MuxAlt3);
 
     /* PORTB11 (pin 59) is configured as UART3_TX */
-    PORT_SetPinMux(CUBE_UART3PINS_DEVUART_TX_PORT, CUBE_UART3PINS_DEVUART_TX_PIN, kPORT_MuxAlt3);
+    PORT_SetPinMux(CUBE_UART3_TX_PORT, CUBE_UART3_TX_PIN, kPORT_MuxAlt3);
 }
 /***********************************************************************************************************************
  * EOF

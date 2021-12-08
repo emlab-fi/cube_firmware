@@ -222,6 +222,7 @@ status reset_pos() {
         log_error("cube_hw: tmc429 pos set fail\n");
         return status::error;
     }
+    return status::no_error;
 }
 
 std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payload* msg) {
@@ -230,16 +231,22 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
     status_t result;
     result = I2C_MasterStart(I2C0_PERIPHERAL, msg->address, kI2C_Write);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return {status::i2c_transfer_error, {} };
     }
     delay(1200);
     result = I2C_MasterWriteBlocking(I2C0_PERIPHERAL, msg->data.data(), msg->tx_length, kI2C_TransferNoStopFlag);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return {status::i2c_transfer_error, {} };
     }
     delay(1200);
-    result = I2C_MasterRepeatedStart(I2C0_PERIPHERAL, msg->address, kI2C_Write);
+    result = I2C_MasterRepeatedStart(I2C0_PERIPHERAL, msg->address, kI2C_Read);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return {status::i2c_transfer_error, {} };
     }
     delay(1200);
@@ -249,13 +256,11 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
 
     result = I2C_MasterReadBlocking(I2C0_PERIPHERAL, reply.data.data(), reply.length, kI2C_TransferDefaultFlag);
     if (result != kStatus_Success) {
+        I2C_MasterClearStatusFlags(I2C0_PERIPHERAL, kI2C_ArbitrationLostFlag | kI2C_IntPendingFlag);
+        I2C_MasterStop(I2C0_PERIPHERAL);
         return {status::i2c_transfer_error, {} };
     }
-    delay(1200);
-
-    for (auto item : reply.data) {
-        log_info("thing_test: %u\n", item);
-    }
+    //delay(1200);
 
     return {status::no_error, reply};
 }
@@ -299,8 +304,3 @@ uint8_t limits_status() {
 }
 
 } //namespace cube_hw
-
-/*
-namespace {
-}
-*/

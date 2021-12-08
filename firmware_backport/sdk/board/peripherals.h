@@ -29,7 +29,7 @@ extern "C" {
 /* Definition of the clock source */
 #define I2C0_CLOCK_SOURCE I2C0_CLK_SRC
 /* Definition of the clock source frequency */
-#define I2C0_CLK_FREQ CLOCK_GetFreq(I2C0_CLOCK_SOURCE)
+#define I2C0_CLK_FREQ 60000000UL
 /* BOARD_InitPeripherals defines for SPI0 */
 /* Definition of peripheral ID */
 #define SPI0_PERIPHERAL SPI0
@@ -65,6 +65,7 @@ extern const uart_config_t UART3_config;
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
+
 void BOARD_InitPeripherals(void);
 
 /***********************************************************************************************************************
