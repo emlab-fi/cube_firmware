@@ -35,7 +35,7 @@ status MCP23008::reset_config() const {
         0x00, //GPINTEN - disable interrupts
         0x00, //DEFVAL - all zero
         0x00, //INTCON - all zero
-        0x00 //IOCON - default
+        0x00  //IOCON - default
     };
 
     if (hal_i2c_transfer(address, data.data(), 7, nullptr, 0) != HAL_OK) {
@@ -73,19 +73,19 @@ status MCP23008::modify_register(uint8_t reg_addr, uint8_t index, bool value) co
 }
 
 status MCP23008::set_pin_mode(uint8_t index, bool value) const {
-    return modify_register(0x00, index, value);
+    return modify_register(IO_DIR_REG_ADDR, index, value);
 }
 
 status MCP23008::pin_write(uint8_t index, bool value) const {
-    return modify_register(0x09, index, value);
+    return modify_register(GPIO_DATA_REG_ADDR, index, value);
 }
 
 std::pair<status, bool> MCP23008::pin_read(uint8_t index) const {
-    constexpr uint8_t reg_addr = 0x09;
+    constexpr uint8_t reg_addr = GPIO_DATA_REG_ADDR;
     uint8_t current_value = 0U;
 
     if (hal_i2c_transfer(address, &reg_addr, 1, &current_value, 1) != HAL_OK) {
-        log_error("cube_hw: mcp23008: register write fail\n");
+        log_error("cube_hw: mcp23008: register read fail\n");
         return {status::gpio_read_error, false};
     }
 
