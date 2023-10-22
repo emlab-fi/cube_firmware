@@ -7,11 +7,11 @@
 namespace cube_hw {
 
 enum class status {
-    no_error,
-    error,
-    msg_send_error,
+    no_error, ///< status ok
+    error, ///< generic error
+    msg_send_error, ///< incorrect msg type, timeouted or internal uart error
     endstop_triggered,
-    i2c_transfer_error,
+    i2c_transfer_error, ///< timeout or internal I2C error
     spi_transfer_error,
     gpio_set_error,
     gpio_read_error,
@@ -33,8 +33,14 @@ void log_error(const char * fmt, ...);
 
 status init_hardware();
 
+/// @brief get received message
+/// @returns newest encoded_message or nullopt if no messages present 
 std::optional<cube::encoded_message> get_message();
 
+
+/// @brief attempts to send encoded message
+/// @param encoded_message to be sent
+/// @returns status::no_error on success
 status send_message(const cube::encoded_message& msg);
 
 status set_motor_power(bool enabled);

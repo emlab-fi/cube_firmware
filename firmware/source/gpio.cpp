@@ -49,4 +49,3 @@ std::pair<status, bool> read_gpio(cube::gpio_config_payload* data) {
 }
 
 } //namespace cube_hw
-

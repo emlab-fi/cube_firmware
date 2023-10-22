@@ -55,4 +55,6 @@ status do_steps(int32_t a, int32_t b, int32_t c) { return status::error; }
 
 status do_velocity(int32_t a, int32_t b, int32_t c) { return status::error; }
 
+status reset_pos() { return status::error; }
+
 } //namespace cube_hw

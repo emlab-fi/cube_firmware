@@ -1,3 +1,8 @@
+/// @file
+/// @brief This file contains serial_buffer definition
+
+// TODO overflow handling?
+
 #pragma once
 #include <cstdint>
 #include <array>
@@ -5,10 +10,12 @@
 
 constexpr std::size_t BUFFER_SIZE = 8;
 
+/// @brief internal message parsing state
 enum class parse_state {
     start, header, type, length, reading
 };
 
+/// @brief FIFO ring buffer for received messages 
 class serial_buffer {
     std::array<cube::encoded_message, BUFFER_SIZE> buffer;
 
@@ -26,17 +33,22 @@ public:
                       bytes_read(0U)
     {}
 
-    void new_byte(const uint8_t data) {
+    /// @brief handles next received byte
+    ///
+    /// state machine for interrupt driven byte-by-byte parsing
+    ///
+    /// @param byte to be parsed
+    void new_byte(const uint8_t byte) {
         switch (state) {
         case parse_state::start:
-            if (data == 0x55) {
+            if (byte == 0x55) {
                 state = parse_state::header;
                 bytes_read = 1;
             }
             break;
 
         case parse_state::header:
-            if (data == 0x55) {
+            if (byte == 0x55) {
                 ++bytes_read;
             } else {
                 state = parse_state::start;
@@ -48,10 +60,10 @@ public:
             break;
 
         case parse_state::type:
-            if (data == 0x01) {
+            if (byte == 0x01) {
                 buffer[write_index].type = cube::message_type::command;
             }
-            else if (data == 0x02) {
+            else if (byte == 0x02) {
                 buffer[write_index].type = cube::message_type::reply;
             }
             else {
@@ -61,13 +73,14 @@ public:
             break;
 
         case parse_state::length:
-            buffer[write_index].length = data;
+            buffer[write_index].length = byte;
             state = parse_state::reading;
             break;
 
         case parse_state::reading:
-            buffer[write_index].data[bytes_read] = data;
+            buffer[write_index].data[bytes_read] = byte;
             ++bytes_read;
+
             if (bytes_read == buffer[write_index].length) {
                 ++write_index;
                 if (write_index == BUFFER_SIZE) {
@@ -83,10 +96,12 @@ public:
         }
     }
 
+    /// @returns true if buffer is empty
     bool empty() const {
         return read_index == write_index;
     }
 
+    /// @returns newest received message
     cube::encoded_message read() {
         std::size_t temp = read_index;
 
