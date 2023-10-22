@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-set(STM32_TOOLCHAIN_PATH "/home/loady/opt/gcc-arm-none-eabi-10-2020-q4-major/")
+# set(STM32_TOOLCHAIN_PATH "/home/loady/opt/gcc-arm-none-eabi-10-2020-q4-major/")
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/stm32_gcc.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
