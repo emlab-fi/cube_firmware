@@ -2,7 +2,10 @@
 /// @brief This file is responsible for device and peripherals initialisation
 
 #pragma once
+#include "drivers/tmc2209.hpp"
+#include "drivers/mcp23008.hpp"
 #include "main.hpp"
+
 
 /// @brief Uart handle for communication and data interface
 extern UART_HandleTypeDef data_uart;
@@ -13,9 +16,28 @@ extern UART_HandleTypeDef debug_uart;
 /// @brief Trinamic Motion Control - physical debugger?
 extern UART_HandleTypeDef tmc_uart;
 
-/// @ brief I2C handle for transferring measured data
+/// @brief I2C handle for transferring measured data
 extern I2C_HandleTypeDef hi2c3;
- 
+
+/// @brief Timer1 used as PWM for stepper motor X - CORE Xy
+extern TIM_HandleTypeDef htim1;
+/// @brief Timer8 used as PWM for stepper motor Z - vertical
+extern TIM_HandleTypeDef htim8;
+/// @brief Timer20 used as PWM for stepper motor Y - CORE xY
+extern TIM_HandleTypeDef htim20;
+
+/// @brief DMA for Timer1
+extern DMA_HandleTypeDef hdma_tim1_up;
+/// @brief DMA for Timer8
+extern DMA_HandleTypeDef hdma_tim8_up;
+/// @brief DMA for Timer20
+extern DMA_HandleTypeDef hdma_tim20_up;
+
+
+extern cube_hw::TMC2209 step_driver_x;
+extern cube_hw::TMC2209 step_driver_y;
+extern cube_hw::TMC2209 step_driver_z1;
+extern cube_hw::TMC2209 step_driver_z2;
 
 /// @brief System clock initialisation function 
 void SystemClock_Config(void);
@@ -34,3 +56,18 @@ void MX_I2C3_Init(void);
 
 /// @brief GPIO initialisation function
 void MX_GPIO_Init(void);
+
+/// @brief TIM1 generated initialisation function
+void MX_TIM1_Init(void);
+
+/// @brief TIM8 generated initialisation function
+void MX_TIM8_Init(void);
+
+/// @brief TIM20 generated initialisation function
+void MX_TIM20_Init(void);
+
+/// @brief TIM1 generated post initialisation function
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
+/// @brief DMA generated initialisation function
+void MX_DMA_Init(void);
