@@ -4,9 +4,13 @@
 ## Dependencies
 - vscode
 - CMake 3.16 and above
-- cmake tools extension
 - c and c++ compiler
 - arm compiler with libraries
+- openocd
+
+### vscode extensions
+- cmake tools
+- cortex-debug
 
 ## Build
 - open project
