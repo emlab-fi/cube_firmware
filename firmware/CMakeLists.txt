@@ -42,7 +42,9 @@ set(SOURCES
     source/gpio.cpp
     source/communication.cpp
     source/movement.cpp
+    source/stepper_generator.cpp
     source/drivers/mcp23008.cpp
+    source/drivers/tmc2209.cpp
     )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -63,12 +65,15 @@ target_link_libraries(${PROJECT_NAME}
     HAL::STM32::G4::GPIO
     HAL::STM32::G4::CORTEX
     HAL::STM32::G4::DMA
+    HAL::STM32::G4::DMAEx
     HAL::STM32::G4::RCC
     HAL::STM32::G4::RCCEx
     HAL::STM32::G4::PWR
     HAL::STM32::G4::PWREx
     HAL::STM32::G4::I2C
     HAL::STM32::G4::I2CEx
+    HAL::STM32::G4::TIM
+    HAL::STM32::G4::TIMEx
     HAL::STM32::G4::UART
     HAL::STM32::G4::UARTEx
     CMSIS::STM32::G474VE
