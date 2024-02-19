@@ -1,7 +1,7 @@
 #pragma once
 #include "planner.hpp"
 
-cube::planner_config planner_conf = {
+constexpr cube::planner_config planner_conf = {
         .machine = cube::planner_machine::corexy,
         .bounds = cube::point(5.5f, 5.5f, 3.5f),
         .step_resolution_a = 10U,
