@@ -4,6 +4,9 @@
 
 namespace {
 
+constexpr uint8_t IO_DIR_REG_ADDR = 0x00;
+constexpr uint8_t GPIO_DATA_REG_ADDR = 0x09;
+
 HAL_StatusTypeDef hal_i2c_transfer(const uint8_t addr, const uint8_t* tx, const uint8_t tx_len, uint8_t* rx, const uint8_t rx_len) {
 
     if (tx_len > 0) {
