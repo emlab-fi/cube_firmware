@@ -4,6 +4,7 @@
 #pragma once
 #include "drivers/tmc2209.hpp"
 #include "drivers/mcp23008.hpp"
+#include "stepper_generator.hpp"
 #include "main.hpp"
 
 
@@ -33,11 +34,19 @@ extern DMA_HandleTypeDef hdma_tim8_up;
 /// @brief DMA for Timer20
 extern DMA_HandleTypeDef hdma_tim20_up;
 
+/// @brief TMC driver for first CoreXY motor
+extern cube_hw::TMC2209 tmc_driver_x;
+/// @brief TMC driver for second CoreXY motor
+extern cube_hw::TMC2209 tmc_driver_y;
+/// @brief TMC driver for first motor of vertical motors pair
+extern cube_hw::TMC2209 tmc_driver_z1;
+/// @brief TMC driver for second motor of vertical motors pair
+extern cube_hw::TMC2209 tmc_driver_z2;
 
-extern cube_hw::TMC2209 step_driver_x;
-extern cube_hw::TMC2209 step_driver_y;
-extern cube_hw::TMC2209 step_driver_z1;
-extern cube_hw::TMC2209 step_driver_z2;
+/// @brief step signal generator for first CoreXY motor
+extern cube_hw::StepperGenerator stepper_generator_x;
+/// @brief step signal generator for second CoreXY motor
+extern cube_hw::StepperGenerator stepper_generator_y;
 
 /// @brief System clock initialisation function 
 void SystemClock_Config(void);
