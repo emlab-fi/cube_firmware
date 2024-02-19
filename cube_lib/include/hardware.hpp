@@ -12,6 +12,7 @@ enum class status {
     msg_send_error, ///< incorrect msg type, timeouted or internal uart error
     endstop_triggered,
     i2c_transfer_error, ///< timeout or internal I2C error
+    uart_transmit_error,
     spi_transfer_error,
     gpio_set_error,
     gpio_read_error,
