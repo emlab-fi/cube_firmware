@@ -1,5 +1,5 @@
+#include "peripherals.hpp"
 #include "hardware.hpp"
-#include "main.hpp"
 
 namespace cube_hw {
 
@@ -11,7 +11,8 @@ status set_motor_power(bool enabled) {
         HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin, GPIO_PIN_RESET);
     } else {
-        log_info("cube_hw: motors off\n");
+        return status::no_error;    
+        //log_info("cube_hw: motors off\n");
         HAL_GPIO_WritePin(ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_SET);
@@ -51,7 +52,23 @@ uint8_t limits_status() {
     return pin_state;
 }
 
-status do_steps(int32_t a, int32_t b, int32_t c) { return status::error; }
+
+status do_steps(int32_t a, int32_t b, int32_t c) {
+    stepper_generator_x.set_direction(a > 0, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
+    stepper_generator_y.set_direction(b > 0, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
+
+    stepper_generator_x.prepare_dma(a);
+    stepper_generator_y.prepare_dma(b);
+
+    double max_time = std::max(stepper_generator_x.dma_ms(), stepper_generator_y.dma_ms());
+    stepper_generator_x.adjust_timings(max_time, a);
+    stepper_generator_y.adjust_timings(max_time, b);
+
+    stepper_generator_x.start();
+    stepper_generator_y.start();
+
+    return status::no_error;
+}
 
 status do_velocity(int32_t a, int32_t b, int32_t c) { return status::error; }
 

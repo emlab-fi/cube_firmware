@@ -1,6 +1,5 @@
-#include "hardware.hpp"
 #include "peripherals.hpp"
-#include "drivers/mcp23008.hpp"
+#include "hardware.hpp"
 
 namespace cube_hw {
 
@@ -25,6 +24,7 @@ std::pair<status, cube::data_reply_payload> i2c_transfer(cube::i2c_transfer_payl
     return {status::no_error, reply };
 }
 
+// TODO
 std::pair<status, cube::data_reply_payload> spi_transfer(cube::spi_transfer_payload*)
 {
     return {status::error, {} };
