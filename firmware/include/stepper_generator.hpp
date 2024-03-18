@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <vector>
 #include <cinttypes>
 #include <cmath>
 #include <stm32g4xx_hal.h>
@@ -10,30 +11,57 @@
 namespace cube_hw
 {
 
+constexpr int RAMPS = 3;
+
 enum class motor_state{
-    RESET,  // not initialized
-    IDLE,   // standby
-    READY,  // dma ready
-    SKIP,   // dma ready with 0 steps
-    BUSY    // running
+    RESET,      // not initialized
+    IDLE,       // standby
+    READY,      // dma ready
+    SKIP,       // dma ready with 0 steps
+    BUSY,       // running
+    VELOCITY    // in velocity mode
 };
 
 /// @brief generator of PWM for stepper motor
 class StepperGenerator {
     TIM_HandleTypeDef& _htim;
     const unsigned _channel;
-    bool _flip_direction = false;
+    const unsigned _steps_per_mm;
     motor_state _state = motor_state::RESET;
 
-    unsigned _dma_idx;
-    float _dma_ms;
-    std::array<uint16_t, DMA_MEM_SIZE> _dma_buffer;
+    // Variables for 8 point movement
+    float ratio = 1.0f;
+    float _const_speed_t = 0.1;
+    float _section_duration = 0.02;
+    unsigned start_v = 10;
+    unsigned end_v = 20;
+    std::array<float, RAMPS> speed_points = {30, 100, 130};
+    std::array<float, RAMPS> accelerations = {100, 300, 100};
+    std::array<float, RAMPS> decelerations = {150, 400, 100};
 
-    void insert_dma(int auto_reload, int repetition_c);
-    void insert_dma_padding(int auto_reload);
+    // Dma storage
+    std::vector<uint16_t> acceleration_mem;
+    std::vector<uint16_t> deceleration_mem;
+
+    int32_t acceleration_steps(const float v0, const float v1, const float a);
+    int32_t constant_steps(const float v);
+    uint16_t get_arr(const float speed);
+    std::pair<int32_t, int32_t> ramp_steps(const unsigned ramp, const float target);
+    float start_speed(const unsigned ramp, bool is_acceleration=true);
+    float target_speed(const unsigned ramp);
+    float acceleration(const unsigned ramp);
+    float deceleration(const unsigned ramp);
+    bool fit_ramp(const unsigned ramp, int32_t& steps);
+    float create_reduced_ramp(const unsigned ramp, int32_t& steps);
+    float get_reduced_target(const unsigned ramp, const float reducer);
+
+    void insert_section(uint16_t auto_reload, uint16_t repetition_c, bool is_acceleration=true);
+    void generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration=true);
+    void generate_constant(int32_t steps, const float speed);
+    void finalize_dma(uint16_t auto_reload);
 
 public:
-    StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel);
+    StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel, unsigned resolution);
 
     /// @brief starts the timer base
     status start_tim_base();
@@ -44,20 +72,11 @@ public:
     /// @brief get current motor state
     motor_state state() const;
 
-    /// @brief get precalculated motor runtime
-    float dma_ms() const;
-    
-    /// @brief negates the result of @ref set_direction
-    void flip_direction();
-
     /// @brief sets the given direction pin
     void set_direction(bool forward, GPIO_TypeDef* PORT, const int PIN);
 
     /// @brief precalculates acceleration curve
-    status prepare_dma(int32_t steps);
-
-    /// @brief stretches the acceleration curve so it fits max_time
-    void adjust_timings(float max_time, int32_t steps);
+    status prepare_dma(int32_t steps, float ratio=1.0f);
 
     /// @brief starts dma transfer
     status start();

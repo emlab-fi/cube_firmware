@@ -56,13 +56,15 @@ uint8_t limits_status() {
 status do_steps(int32_t a, int32_t b, int32_t c) {
     stepper_generator_x.set_direction(a > 0, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
     stepper_generator_y.set_direction(b > 0, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
+    
+    a = std::abs(a);
+    b = std::abs(b);
+    float ratio = 1.0f;
+    if (a != 0 || b != 0)
+        ratio = a > b ? static_cast<float>(b) / a : static_cast<float>(a) / b;
 
-    stepper_generator_x.prepare_dma(a);
-    stepper_generator_y.prepare_dma(b);
-
-    double max_time = std::max(stepper_generator_x.dma_ms(), stepper_generator_y.dma_ms());
-    stepper_generator_x.adjust_timings(max_time, a);
-    stepper_generator_y.adjust_timings(max_time, b);
+    stepper_generator_x.prepare_dma(a, a > b ? 1.0 : ratio);
+    stepper_generator_y.prepare_dma(b, b > a ? 1.0 : ratio);
 
     stepper_generator_x.start();
     stepper_generator_y.start();

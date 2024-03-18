@@ -1,4 +1,5 @@
 #include "peripherals.hpp"
+#include "config.hpp"
 
 UART_HandleTypeDef data_uart;
 UART_HandleTypeDef debug_uart;
@@ -19,8 +20,8 @@ cube_hw::TMC2209 tmc_driver_y(0x01);
 cube_hw::TMC2209 tmc_driver_z1(0x02);
 cube_hw::TMC2209 tmc_driver_z2(0x03);
 
-cube_hw::StepperGenerator stepper_generator_x(htim1, TIM_CHANNEL_1);
-cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1);
+cube_hw::StepperGenerator stepper_generator_x(htim1, TIM_CHANNEL_1, planner_conf.step_resolution_a);
+cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1, planner_conf.step_resolution_a);
 
 // code in here is mainly generated using online tool
 

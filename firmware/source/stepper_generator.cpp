@@ -1,10 +1,13 @@
+#include <vector>
+#include <algorithm>
 #include "stepper_generator.hpp"
 
 namespace cube_hw {
 
-StepperGenerator::StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel) :
+StepperGenerator::StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel, unsigned steps_for_mm) :
     _htim(htim),
-    _channel(channel) {}
+    _channel(channel),
+    _steps_per_mm(steps_for_mm) {}
 
 status StepperGenerator::start_tim_base() {
     if (_state != motor_state::RESET)
@@ -19,57 +22,163 @@ status StepperGenerator::start_tim_base() {
 
 const TIM_HandleTypeDef* StepperGenerator::htim() const {return &_htim;}
 motor_state StepperGenerator::state() const {return _state;}
-float StepperGenerator::dma_ms() const {return _dma_ms;}
 
 void StepperGenerator::finished_callback() {
-    // TODO
     if (_state != motor_state::BUSY) {
-        log_error("Attempt to stop which is not running");
+        log_error("Attempt to stop motor which is not running");
         return;
     }
 
     HAL_TIM_PWM_Stop(&_htim, _channel);
-    _dma_idx = 0;
-    _dma_ms = 0;
     _state = motor_state::IDLE;
 }
 
-double ramping_value(float x) {
-    return 1.0f / (1 + std::exp(-6.0f * (x - 0.5f)));
-}
-
-void StepperGenerator::flip_direction() {
-    if (_state == motor_state::IDLE) {
-        _flip_direction = !_flip_direction;
-    }
-}
-
 void StepperGenerator::set_direction(bool forward, GPIO_TypeDef* PORT, const int PIN) {
-    auto direction = forward ? GPIO_PIN_SET : GPIO_PIN_RESET;
-    if (_flip_direction) {
-        direction = GPIO_PIN_SET ? GPIO_PIN_RESET : GPIO_PIN_SET;
+    HAL_GPIO_WritePin(PORT, PIN, forward ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+int32_t StepperGenerator::acceleration_steps(const float v0, const float v1, const float a) {
+    return static_cast<int32_t>((v1 * v1 - v0 * v0) / (a * 2.0f) * _steps_per_mm);;
+}
+
+int32_t StepperGenerator::constant_steps(const float v) {
+    // v = s / t
+    return static_cast<int32_t>(v * _const_speed_t * _steps_per_mm);
+}
+
+uint16_t StepperGenerator::get_arr(const float speed) {
+    // v = s / t
+    // v = speed [mm/s]
+    // s = 1 step = 1 / STEP_PER_MM [mm]
+    // t = arr * (1 / TIM_CLOCK) [s]
+    // speed = (1 / STEP_PER_MM) / (arr * (1 / TIM_CLOCK))
+    // speed = TIM_Clock / (arr * STEP_PER_MM)
+    return static_cast<uint16_t>(TIM_CLOCK / (speed * _steps_per_mm));
+}
+
+float StepperGenerator::start_speed(const unsigned idx, bool is_acceleration) {
+    if (idx > 0)
+        return speed_points[idx - 1] * ratio;
+    return (is_acceleration ? start_v : end_v) * ratio;
+}
+
+float StepperGenerator::target_speed(const unsigned idx) {
+    return speed_points[idx] * ratio;
+}
+
+float StepperGenerator::acceleration(const unsigned idx) {
+    return accelerations[idx] * ratio;
+}
+
+float StepperGenerator::deceleration(const unsigned idx) {
+    return decelerations[idx] * ratio;
+}
+
+float StepperGenerator::get_reduced_target(const unsigned idx, const float reducer) {
+    const float v0 = start_speed(idx, false);
+    const float v1 = target_speed(idx);
+    return v0 + reducer * (v1 - v0);
+}
+
+std::pair<int32_t, int32_t> StepperGenerator::ramp_steps(const unsigned idx, const float target) {
+    int32_t steps_acc = acceleration_steps(start_speed(idx), target, acceleration(idx));
+    int32_t steps_dec = acceleration_steps(start_speed(idx, false), target, deceleration(idx));
+    return {steps_acc, steps_dec};
+}
+
+bool StepperGenerator::fit_ramp(const unsigned idx, int32_t& steps) {
+    const float target = target_speed(idx);
+    auto [steps_acc, steps_dec] = ramp_steps(idx, target);
+    if (constant_steps(target) + steps_acc + steps_dec < steps) {
+        steps -= steps_acc + steps_dec;
+        const float target_arr = get_arr(target);
+        generate_slope(steps_acc, idx, target_arr);
+        generate_slope(steps_dec, idx, target_arr, false);
+        return true;
     }
-    HAL_GPIO_WritePin(PORT, PIN, direction);
+    return false;
 }
 
-void StepperGenerator::insert_dma(int auto_reload, int repetition_c) {
-    _dma_ms += 0.0000625 * static_cast<float>((auto_reload + 1) * repetition_c);  
-    _dma_buffer[_dma_idx++] = auto_reload;
-    _dma_buffer[_dma_idx++] = repetition_c - 1;
-    _dma_buffer[_dma_idx++] = auto_reload / 2;
+float StepperGenerator::create_reduced_ramp(const unsigned idx, int32_t& steps) {
+    for (int reducer = 0; reducer <= 10; ++reducer) {
+        float reduced_target = get_reduced_target(idx, reducer / 10.0f);
+        auto [steps_acc, steps_dec] = ramp_steps(idx, reduced_target);
+        if (constant_steps(reduced_target) + steps_acc + steps_dec > steps) {
+            const float target_arr = get_arr(reduced_target);
+            if (reduced_target == end_v) {
+                steps_acc = std::min(steps_acc, steps);
+                steps -= steps_acc;
+                generate_slope(steps_acc, idx, target_arr);
+            } else {
+                steps -= steps_acc + steps_dec;
+                generate_slope(steps_acc, idx, target_arr);
+                generate_slope(steps_dec, idx, target_arr, false);
+            }
+            return reduced_target;
+        }
+    }
+    // should not reach here
+    return start_speed(idx);
 }
 
-void StepperGenerator::insert_dma_padding(int auto_reload) {
-    _dma_buffer[_dma_idx++] = auto_reload;
-    _dma_buffer[_dma_idx++] = 0;
-    _dma_buffer[_dma_idx++] = 0;
-    _dma_buffer[_dma_idx++] = auto_reload;
-    _dma_buffer[_dma_idx++] = 0;
-    _dma_buffer[_dma_idx++] = 0;
+void StepperGenerator::insert_section(uint16_t arr, uint16_t rcr, bool is_acceleration) {
+    if (is_acceleration) {
+        acceleration_mem.emplace_back(arr -1);
+        acceleration_mem.emplace_back(rcr -1);
+        acceleration_mem.emplace_back(arr / 2 -1);
+    } else {
+        // needs to be put in reverse
+        deceleration_mem.emplace_back(arr / 2 -1);        
+        deceleration_mem.emplace_back(rcr -1);
+        deceleration_mem.emplace_back(arr -1);
+    }
 }
 
-status StepperGenerator::prepare_dma(int32_t steps) {
-    steps = std::abs(steps);
+void StepperGenerator::finalize_dma(uint16_t arr) {
+    acceleration_mem.insert(acceleration_mem.end(), deceleration_mem.rbegin(), deceleration_mem.rend());
+    this->ratio = 1.0f;
+
+    acceleration_mem.emplace_back(arr);
+    acceleration_mem.emplace_back(0);
+    acceleration_mem.emplace_back(0);
+    acceleration_mem.emplace_back(arr);
+    acceleration_mem.emplace_back(0);
+    acceleration_mem.emplace_back(0);
+}
+
+void StepperGenerator::generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration) {
+    int32_t steps_done = 0;
+    const float section_duration = std::max(_section_duration, static_cast<float>(target_arr) / TIM_CLOCK);
+    const float speed_increment = (is_acceleration ? acceleration(ramp) : deceleration(ramp)) * section_duration;
+    float speed = std::max(start_speed(ramp, is_acceleration), 1.0f);
+
+    while (steps_done < steps) {
+        uint16_t arr = get_arr(speed);
+        if (arr < target_arr)
+            arr = target_arr;
+
+        // t = arr * rcr * (1 / TIM_CLOCK)
+        uint16_t rcr = static_cast<uint16_t>(section_duration * TIM_CLOCK / arr);
+        if (steps_done + rcr > steps)
+            rcr = static_cast<uint16_t>(steps - steps_done);
+
+        insert_section(arr, rcr, is_acceleration);
+        speed += speed_increment;
+        steps_done += rcr;
+    }
+}
+
+void StepperGenerator::generate_constant(int32_t steps, const float speed) {
+    const uint16_t arr = get_arr(speed);
+
+    while (steps > 0) {
+        uint16_t rcr = (steps >= 0xfff0) ? 0xfff0 : steps;
+        insert_section(arr, rcr);
+        steps -= rcr;
+    }
+}
+
+status StepperGenerator::prepare_dma(int32_t steps, float ratio) {
     if (steps == 0) {
         _state = motor_state::SKIP;
         return status::no_error;
@@ -79,59 +188,24 @@ status StepperGenerator::prepare_dma(int32_t steps) {
         return status::error;
     }
 
-    int32_t start_steps = static_cast<int32_t>((MAX_SPEED * MAX_SPEED) / (ACCELERATION * 2.0) * planner_conf.step_resolution_a);
-    int32_t stop_steps = static_cast<int32_t>((MAX_SPEED * MAX_SPEED) / (DECELERATION * 2.0) * planner_conf.step_resolution_a); 
-    int32_t const_steps = std::max(0l, steps - start_steps - stop_steps);
-    const int32_t start_limit = static_cast<int32_t>((steps) * DECELERATION / (ACCELERATION + DECELERATION));
+    steps = std::abs(steps);
+    acceleration_mem.clear();
+    deceleration_mem.clear();
+    this->ratio = ratio;
+
+    int ramp = 0;
+    while (ramp < RAMPS && fit_ramp(ramp, steps)) {
+        ++ramp;
+    }
+
+    const float max_speed = ramp < RAMPS ? create_reduced_ramp(ramp, steps) : target_speed(ramp - 1);    
+    if (steps > 0) {
+        generate_constant(steps, max_speed);
+    }
     
-    const int max_speed = start_limit < start_steps ? (MAX_SPEED * start_limit) / start_steps : MAX_SPEED;
-    start_steps = std::min(start_steps, start_limit);
-    stop_steps = std::min(stop_steps, steps - start_limit);
-    int start_steps_rcr = start_steps / START_RESOLUTION;
-    int stop_steps_rcr = stop_steps / STOP_RESOLUTION;
-    const int const_arr = TIM_CLOCK / (planner_conf.step_resolution_a * MAX_SPEED);
-
-    float one_p = 1.0 / START_RESOLUTION;
-    float half_p = one_p / 2.0;
-    for (int i = 0; i < START_RESOLUTION; ++i) {
-        int speed = static_cast<int>(max_speed * ramping_value(i * one_p + half_p));
-        if (i >= START_RESOLUTION - 1)
-            start_steps_rcr += start_steps % START_RESOLUTION;
-        insert_dma(TIM_CLOCK / (planner_conf.step_resolution_a * std::max(speed, 2)), start_steps_rcr);
-    }
-    while (const_steps > 0) {
-        int cnt = const_steps >= 65000l ? 65000 : const_steps;
-        insert_dma(const_arr, cnt);
-        const_steps -= cnt;
-    }
-    one_p = 1.0 / STOP_RESOLUTION;
-    half_p = one_p / 2.0;
-    for (int i = 0; i < STOP_RESOLUTION; ++i) {
-        int speed = max_speed - static_cast<int>(max_speed * ramping_value(i * one_p + half_p));
-        if (i >= STOP_RESOLUTION - 1)
-            stop_steps_rcr += stop_steps % STOP_RESOLUTION;
-        insert_dma(TIM_CLOCK / (planner_conf.step_resolution_a * std::max(speed, 2)), stop_steps_rcr);
-    }
-
-    insert_dma_padding(99);
+    finalize_dma(100);
     _state = motor_state::READY;
     return status::no_error;
-}
-
-void StepperGenerator::adjust_timings(float max_time, int32_t steps) {
-    if (_state != motor_state::READY || (_dma_ms + 1.0f > max_time && max_time < _dma_ms + 1.0f)) {
-        return;
-    }
-
-    steps = std::abs(steps);
-    const float ms_p_step = (max_time - _dma_ms) / static_cast<float>(steps);
-    float arr_offset_f = ms_p_step / 0.0000625;
-    int arr_offset = static_cast<int>(arr_offset_f);
-
-    for (unsigned i = 0; i < _dma_idx; i += 3) {
-        _dma_buffer[i] += arr_offset;
-        _dma_buffer[i + 2] = _dma_buffer[i] / 2;
-    }
 }
 
 status StepperGenerator::start() {
@@ -152,7 +226,7 @@ status StepperGenerator::start() {
         return status::error;
     }
 
-    retval = HAL_TIM_DMABurst_MultiWriteStart(&_htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)_dma_buffer.data(), TIM_DMABURSTLENGTH_3TRANSFERS, _dma_idx);
+    retval = HAL_TIM_DMABurst_MultiWriteStart(&_htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)acceleration_mem.data(), TIM_DMABURSTLENGTH_3TRANSFERS, acceleration_mem.size());
     if (HAL_OK != retval) {
         cube_hw::log_info("stepper_generator: Failed to start DMA PWM with rv:%d\n", retval);
         return status::error;
