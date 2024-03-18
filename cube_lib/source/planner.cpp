@@ -98,8 +98,8 @@ planner_result planner::do_move(const point& pos) {
 
     case planner_machine::corexy:
         //the 0.5f should not be here? we'll see
-        output.steps_a = 0.5f * (distance[0] + distance[1]) * config.step_resolution_a;
-        output.steps_b = 0.5f * (distance[0] - distance[1]) * config.step_resolution_b;
+        output.steps_a = (distance[0] + distance[1]) * config.step_resolution_a;
+        output.steps_b = (distance[0] - distance[1]) * config.step_resolution_b;
         output.steps_c = distance[2] * config.step_resolution_c;
     break;
 
@@ -108,6 +108,7 @@ planner_result planner::do_move(const point& pos) {
     break;
     }
 
+    // TODO what if HW fails?
     if (output.err != planner_error::misc) {
         current_pos = std::move(target);
     }
