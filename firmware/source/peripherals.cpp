@@ -15,10 +15,10 @@ DMA_HandleTypeDef hdma_tim1_up;
 DMA_HandleTypeDef hdma_tim8_up;
 DMA_HandleTypeDef hdma_tim20_up;
 
-cube_hw::TMC2209 tmc_driver_x(0x00);
-cube_hw::TMC2209 tmc_driver_y(0x01);
-cube_hw::TMC2209 tmc_driver_z1(0x02);
-cube_hw::TMC2209 tmc_driver_z2(0x03);
+cube_hw::TMC2209 tmc_driver_x(0x00, ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin);
+cube_hw::TMC2209 tmc_driver_y(0x01, ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin);
+cube_hw::TMC2209 tmc_driver_z1(0x02, ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin);
+cube_hw::TMC2209 tmc_driver_z2(0x03, ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin);
 
 cube_hw::StepperGenerator stepper_generator_x(htim1, TIM_CHANNEL_1, planner_conf.step_resolution_a);
 cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1, planner_conf.step_resolution_a);

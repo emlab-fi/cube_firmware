@@ -38,19 +38,24 @@ constexpr uint8_t PWM_AUTO_REG_ADDR = 0x72;
 
 namespace cube_hw {
 
-TMC2209::TMC2209(const uint8_t address) : _address(address) {}
+TMC2209::TMC2209(const uint8_t address, GPIO_TypeDef* enable_pin_gpio, const uint16_t enable_pin) : 
+    _address(address),
+    enable_pin_gpio(enable_pin_gpio),
+    enable_pin(enable_pin) {}
 
 status TMC2209::configure() {
     uint8_t read_buffer[4];
 
-    // read transmit count
+    set_enable_pin(true);
+
+    // init write counter
     auto retval = read_reg(IFCNT_REG_ADDR, read_buffer);
     if (retval != status::no_error)
         return retval;
-    
-    _transmission_count = read_buffer[0];
 
-    // write configuration
+    _write_counter = read_buffer[0];
+
+    // write default configuration
     if (set_node_config() != status::no_error ||
         set_general_config() != status::no_error ||
         set_current_config() != status::no_error ||
@@ -58,14 +63,40 @@ status TMC2209::configure() {
         return status::uart_transmit_error;
     
     // check that driver received configuration 
-    retval = read_reg(IFCNT_REG_ADDR, read_buffer);
+    return verify_writes();
+}
+
+void TMC2209::set_enable_pin(bool enable) {
+    if (enable && !enabled) {
+        HAL_GPIO_WritePin(enable_pin_gpio, enable_pin, GPIO_PIN_RESET); // actual pin is reversed
+    } else if (!enable && enabled) {
+        HAL_GPIO_WritePin(enable_pin_gpio, enable_pin, GPIO_PIN_SET); // actual pin is reversed
+    }
+    enabled = enable;
+}
+
+status TMC2209::set_freewheel(bool enable) {
+    uint8_t read_buffer[4];
+
+    if (enable && !freewheel) {
+        set_current_config(0, 0);
+        read_reg(PWMCONF_REG_ADDR, read_buffer);
+        read_buffer[2] &= ~0xf0;
+        read_buffer[2] |= 0x10;
+    } else if (!enable && freewheel) {
+        set_current_config();
+        read_reg(PWMCONF_REG_ADDR, read_buffer);
+        read_buffer[2] &= ~0xf0;
+    } else {
+        return status::no_error;
+    }
+    freewheel = enable;
+
+    const auto retval = write_reg(PWMCONF_REG_ADDR, read_buffer[0], read_buffer[1], read_buffer[2], read_buffer[3]);
     if (retval != status::no_error)
         return retval;
 
-    if (read_buffer[0] != _transmission_count + 4)
-        return status::uart_transmit_error;
-
-    return status::no_error;
+    return verify_writes();
 }
 
 void TMC2209::append_crc(uint8_t* data, uint8_t bytes) {
@@ -106,6 +137,7 @@ status TMC2209::write_reg(const uint8_t reg_addr, const uint8_t b0, const uint8_
     if (HAL_UART_Transmit(&tmc_uart, data, 8, 10) != HAL_OK)
         return status::uart_transmit_error;
 
+    ++_write_counter;
     return status::no_error;
 }
  
@@ -136,6 +168,18 @@ status TMC2209::read_reg(const uint8_t reg_addr, uint8_t* result) {
     return status::no_error;
 }
 
+status TMC2209::verify_writes() {
+    uint8_t read_buffer[4];
+    const auto retval = read_reg(IFCNT_REG_ADDR, read_buffer);
+    if (retval != status::no_error)
+        return retval;
+
+    if (read_buffer[0] != _write_counter)
+        return status::uart_transmit_error;
+
+    return status::no_error;
+}
+
 status TMC2209::set_general_config() {
     // byte 0
     // b0 0 -> internal reference,          1 -> use VREF
@@ -161,14 +205,14 @@ status TMC2209::set_node_config() {
     return write_reg(NODECONF_REG_ADDR, 0, response_delay, 0, 0);
 }
 
-status TMC2209::set_current_config() {
+status TMC2209::set_current_config(const uint8_t stand_still, const uint8_t running) {
     // currents: num / 32 (5bit)
-    constexpr uint8_t stand_still = 0x0a;   // lowest standstill current
-    constexpr uint8_t running = 0x1f;       // max running current
+    //constexpr uint8_t stand_still = 0x0a;   // lowest standstill current
+    //constexpr uint8_t running = 0x1f;       // max running current
     constexpr uint8_t stop_delay = 0x2;     // n * 2^18 clocks
 
-    constexpr uint8_t b0 = stand_still | ((running & 0b111) << 5);
-    constexpr uint8_t b1 = (stop_delay << 2) | (running >> 3);
+    const uint8_t b0 = stand_still | ((running & 0b111) << 5);
+    const uint8_t b1 = (stop_delay << 2) | (running >> 3);
 
     return write_reg(IHOLD_IRUN_REG_ADDR, b0, b1, 0, 0);
 }
