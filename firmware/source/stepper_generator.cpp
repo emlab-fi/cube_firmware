@@ -33,6 +33,13 @@ void StepperGenerator::finished_callback() {
     _state = motor_state::IDLE;
 }
 
+void StepperGenerator::limit_hit() {
+    if (_state == motor_state::VELOCITY) {
+        HAL_TIM_PWM_Stop(&_htim, _channel);
+        _state = motor_state::IDLE;
+    }
+}
+
 void StepperGenerator::set_direction(bool forward, GPIO_TypeDef* PORT, const int PIN) {
     HAL_GPIO_WritePin(PORT, PIN, forward ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }

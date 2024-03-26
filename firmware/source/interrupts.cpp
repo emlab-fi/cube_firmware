@@ -12,6 +12,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     stepper_generator_y.finished_callback();
   }
 }
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  switch (GPIO_Pin) {
+    case LIMIT_X_START:
+    case LIMIT_X_STOP:
+    case LIMIT_Y_START:
+    case LIMIT_Y_STOP:
+      core_xy.limit_hit(GPIO_Pin);
+      break;
+    default:
+      break;
+  }
+}
+
 extern "C" {
 /**
   * @brief This function handles Non maskable interrupt.
@@ -113,6 +127,25 @@ void I2C3_EV_IRQHandler(void)
   HAL_I2C_EV_IRQHandler(&hi2c3);
 }
 
+/**
+  * @brief This function handles EXTI line[9:5] interrupts.
+  */
+void EXTI9_5_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
+}
 
 /**
   * @brief This function handles DMA1 channel1 global interrupt.

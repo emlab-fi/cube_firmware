@@ -18,7 +18,7 @@ enum class motor_state{
     IDLE,       // standby
     READY,      // dma ready
     SKIP,       // dma ready with 0 steps
-    BUSY,       // running
+    BUSY,       // running    
     VELOCITY    // in velocity mode
 };
 
@@ -86,6 +86,9 @@ public:
 
     /// @brief must be called after the dma finished transfer
     void finished_callback();
+
+    /// @brief called in interrupt handler 
+    void limit_hit();
 };
 
 } // namespace cube_hw

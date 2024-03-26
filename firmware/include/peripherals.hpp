@@ -48,6 +48,14 @@ extern cube_hw::StepperGenerator stepper_generator_x;
 /// @brief step signal generator for second CoreXY motor
 extern cube_hw::StepperGenerator stepper_generator_y;
 
+
+constexpr uint16_t LIMIT_X_STOP = IO1_Pin;
+constexpr uint16_t LIMIT_X_START = IO2_Pin;
+constexpr uint16_t LIMIT_Y_STOP = IO3_Pin;
+constexpr uint16_t LIMIT_Y_START = IO4_Pin;
+constexpr uint16_t LIMIT_Z_STOP = IO5_Pin;
+constexpr uint16_t LIMIT_Z_START = IO6_Pin;
+
 /// @brief System clock initialisation function 
 void SystemClock_Config(void);
 
