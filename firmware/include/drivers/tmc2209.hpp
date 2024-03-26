@@ -3,6 +3,7 @@
 
 #pragma once
 #include <cstdint>
+#include <stm32g4xx_hal.h>
 #include "hardware.hpp"
 
 namespace cube_hw {
