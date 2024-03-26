@@ -81,6 +81,9 @@ public:
     /// @brief starts dma transfer
     status start();
 
+    /// @brief moves at speed until according limit is hit
+    status do_velocity(float speed);
+
     /// @brief must be called after the dma finished transfer
     void finished_callback();
 };

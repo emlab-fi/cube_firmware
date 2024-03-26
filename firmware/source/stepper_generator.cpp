@@ -235,4 +235,30 @@ status StepperGenerator::start() {
     return status::no_error;
 }
 
+status StepperGenerator::do_velocity(float speed) {
+    if (_state != motor_state::IDLE) {
+        cube_hw::log_error("stepper_generator: Motor is not idle\n");
+        return status::error;
+    }
+
+    speed = abs(speed);
+    if (speed < MIN_VELOCITY || speed > MAX_VELOCITY) {
+        cube_hw::log_error("stepper_generator: velocity speed out of range\n");
+        return status::error;
+    }
+
+    _state = motor_state::VELOCITY;
+    const uint16_t arr = get_arr(speed);
+    _htim.Instance->ARR = arr - 1;
+    _htim.Instance->CCR1 = arr / 2;
+
+    auto retval = HAL_TIM_PWM_Start(&_htim, _channel);
+    if (HAL_OK != retval) {
+        cube_hw::log_info("stepper_generator: Failed to start PWM on TIM8 with rv:%d\n", retval);
+        return status::error;
+    }
+
+    return status::no_error;
+}
+
 } //cube_hw
