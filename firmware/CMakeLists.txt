@@ -43,6 +43,7 @@ set(SOURCES
     source/communication.cpp
     source/movement.cpp
     source/stepper_generator.cpp
+    source/core_xy.cpp
     source/drivers/mcp23008.cpp
     source/drivers/tmc2209.cpp
     )

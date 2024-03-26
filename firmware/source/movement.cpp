@@ -4,20 +4,20 @@
 namespace cube_hw {
 
 status set_motor_power(bool enabled) {
-    if (enabled) {
-        log_info("cube_hw: motors on\n");
-        HAL_GPIO_WritePin(ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin, GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin, GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin, GPIO_PIN_RESET);
-    } else {
-        return status::no_error;    
-        //log_info("cube_hw: motors off\n");
-        HAL_GPIO_WritePin(ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin, GPIO_PIN_SET);
-    }
+    // if (enabled) {
+    //     log_info("cube_hw: motors on\n");
+    //     HAL_GPIO_WritePin(ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin, GPIO_PIN_RESET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin, GPIO_PIN_RESET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_RESET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin, GPIO_PIN_RESET);
+    // } else {
+    //     return status::no_error;    
+    //     //log_info("cube_hw: motors off\n");
+    //     HAL_GPIO_WritePin(ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin, GPIO_PIN_SET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin, GPIO_PIN_SET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin, GPIO_PIN_SET);
+    //     HAL_GPIO_WritePin(ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin, GPIO_PIN_SET);
+    // }
     return status::no_error;
 }
 
@@ -54,20 +54,14 @@ uint8_t limits_status() {
 
 
 status do_steps(int32_t a, int32_t b, int32_t c) {
-    stepper_generator_x.set_direction(a > 0, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
-    stepper_generator_y.set_direction(b > 0, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
-    
-    a = std::abs(a);
-    b = std::abs(b);
-    float ratio = 1.0f;
-    if (a != 0 || b != 0)
-        ratio = a > b ? static_cast<float>(b) / a : static_cast<float>(a) / b;
+    // stepper_generator_z.set_direction(c > 0, DIR3_OUT_GPIO_Port, DIR3_OUT_Pin);
+    // stepper_generator_z.prepare_dma(z);
+    //stepper_generator_z.start();
 
-    stepper_generator_x.prepare_dma(a, a > b ? 1.0 : ratio);
-    stepper_generator_y.prepare_dma(b, b > a ? 1.0 : ratio);
+    core_xy.move(a, b);
 
-    stepper_generator_x.start();
-    stepper_generator_y.start();
+    // busy wait
+    while(!core_xy.is_idle()); // && stepper_generator_z.state() != motor_state::IDLE);
 
     return status::no_error;
 }

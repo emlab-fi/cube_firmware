@@ -21,7 +21,9 @@ cube_hw::TMC2209 tmc_driver_z1(0x02, ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin);
 cube_hw::TMC2209 tmc_driver_z2(0x03, ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin);
 
 cube_hw::StepperGenerator stepper_generator_x(htim1, TIM_CHANNEL_1, planner_conf.step_resolution_a);
-cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1, planner_conf.step_resolution_a);
+cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1, planner_conf.step_resolution_b);
+
+cube_hw::CoreXY core_xy(stepper_generator_x, stepper_generator_y);
 
 // code in here is mainly generated using online tool
 
