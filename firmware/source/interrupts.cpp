@@ -2,6 +2,16 @@
 #include "main.hpp"
 #include "peripherals.hpp"
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+  HAL_TIM_DMABurst_WriteStop(htim, TIM_DMA_UPDATE);
+
+  if (htim == stepper_generator_x.htim()) {
+    stepper_generator_x.finished_callback();
+  }
+  if (htim == stepper_generator_y.htim()) {
+    stepper_generator_y.finished_callback();
+  }
+}
 extern "C" {
 /**
   * @brief This function handles Non maskable interrupt.

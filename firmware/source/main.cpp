@@ -12,18 +12,6 @@ void Error_Handler(void) {
   while (1);
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  HAL_TIM_DMABurst_WriteStop(htim, TIM_DMA_UPDATE);
-
-  if (htim == stepper_generator_x.htim()) {
-    stepper_generator_x.finished_callback();
-  }
-  if (htim == stepper_generator_y.htim()) {
-    stepper_generator_y.finished_callback();
-  }
-
-}
-
 int main(void) {
     HAL_Init();
     SystemClock_Config();
