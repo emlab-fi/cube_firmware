@@ -22,10 +22,22 @@ enum class motor_state{
     VELOCITY    // in velocity mode
 };
 
+struct MotorPins {
+    TIM_HandleTypeDef& htim;
+    const uint16_t channel;
+    GPIO_TypeDef* dir_gpio;
+    const uint16_t dir_pin;
+
+    MotorPins(TIM_HandleTypeDef& htim, const uint16_t channel, GPIO_TypeDef* dir_gpio, const uint16_t dir_pin);
+    MotorPins(const MotorPins&) = delete;
+    MotorPins& operator=(const MotorPins&) = delete;
+};
+
 /// @brief generator of PWM for stepper motor
 class StepperGenerator {
-    TIM_HandleTypeDef& _htim;
-    const unsigned _channel;
+    const MotorPins& pins;
+    int dma_burst_padding;
+    uint32_t dma_burst_length;
     const unsigned _steps_per_mm;
     motor_state _state = motor_state::RESET;
 
@@ -55,13 +67,16 @@ class StepperGenerator {
     float create_reduced_ramp(const unsigned ramp, int32_t& steps);
     float get_reduced_target(const unsigned ramp, const float reducer);
 
+    void set_direction(bool forward);
     void insert_section(uint16_t auto_reload, uint16_t repetition_c, bool is_acceleration=true);
     void generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration=true);
     void generate_constant(int32_t steps, const float speed);
     void finalize_dma(uint16_t auto_reload);
 
 public:
-    StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel, unsigned resolution);
+    StepperGenerator(const MotorPins& pins, unsigned resolution);
+    StepperGenerator(const StepperGenerator&) = delete;
+    StepperGenerator& operator=(const StepperGenerator&) = delete;
 
     /// @brief starts the timer base
     status start_tim_base();
@@ -71,9 +86,6 @@ public:
 
     /// @brief get current motor state
     motor_state state() const;
-
-    /// @brief sets the given direction pin
-    void set_direction(bool forward, GPIO_TypeDef* PORT, const int PIN);
 
     /// @brief precalculates acceleration curve
     status prepare_dma(int32_t steps, float ratio=1.0f);

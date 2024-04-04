@@ -4,23 +4,37 @@
 
 namespace cube_hw {
 
-StepperGenerator::StepperGenerator(TIM_HandleTypeDef& htim, unsigned channel, unsigned steps_for_mm) :
-    _htim(htim),
-    _channel(channel),
-    _steps_per_mm(steps_for_mm) {}
+MotorPins::MotorPins(TIM_HandleTypeDef& htim, const uint16_t channel, GPIO_TypeDef* dir_gpio, const uint16_t dir_pin) :
+    htim(htim),
+    channel(channel),
+    dir_gpio(dir_gpio),
+    dir_pin(dir_pin) {}
+
+StepperGenerator::StepperGenerator(const MotorPins& pins, unsigned steps_for_mm) :
+    pins(pins),
+    _steps_per_mm(steps_for_mm) {
+    switch (pins.channel) {
+        case TIM_CHANNEL_1: dma_burst_padding = 0; dma_burst_length = TIM_DMABurstLength_3Transfers; break;
+        case TIM_CHANNEL_2: dma_burst_padding = 1; dma_burst_length = TIM_DMABurstLength_4Transfers; break;
+        case TIM_CHANNEL_3: dma_burst_padding = 2; dma_burst_length = TIM_DMABurstLength_5Transfers; break;
+        case TIM_CHANNEL_4: dma_burst_padding = 3; dma_burst_length = TIM_DMABurstLength_6Transfers; break;
+        case TIM_CHANNEL_5: dma_burst_padding = 4; dma_burst_length = TIM_DMABurstLength_7Transfers; break;
+        case TIM_CHANNEL_6: dma_burst_padding = 5; dma_burst_length = TIM_DMABurstLength_8Transfers; break;
+    }
+}
 
 status StepperGenerator::start_tim_base() {
     if (_state != motor_state::RESET)
         return status::error;
 
-    if (HAL_TIM_Base_Start(&_htim) != HAL_OK)
+    if (HAL_TIM_Base_Start(&pins.htim) != HAL_OK)
         cube_hw::log_error("Failed to start timer base for stepper motor");
 
     _state = motor_state::IDLE;
     return status::no_error;
 }
 
-const TIM_HandleTypeDef* StepperGenerator::htim() const {return &_htim;}
+const TIM_HandleTypeDef* StepperGenerator::htim() const {return &pins.htim;}
 motor_state StepperGenerator::state() const {return _state;}
 
 void StepperGenerator::finished_callback() {
@@ -29,19 +43,19 @@ void StepperGenerator::finished_callback() {
         return;
     }
 
-    HAL_TIM_PWM_Stop(&_htim, _channel);
+    HAL_TIM_PWM_Stop(&pins.htim, pins.channel);
     _state = motor_state::IDLE;
 }
 
 void StepperGenerator::limit_hit() {
     if (_state == motor_state::VELOCITY) {
-        HAL_TIM_PWM_Stop(&_htim, _channel);
+        HAL_TIM_PWM_Stop(&pins.htim, pins.channel);
         _state = motor_state::IDLE;
     }
 }
 
-void StepperGenerator::set_direction(bool forward, GPIO_TypeDef* PORT, const int PIN) {
-    HAL_GPIO_WritePin(PORT, PIN, forward ? GPIO_PIN_SET : GPIO_PIN_RESET);
+void StepperGenerator::set_direction(bool forward) {
+    HAL_GPIO_WritePin(pins.dir_gpio, pins.dir_pin, forward ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 int32_t StepperGenerator::acceleration_steps(const float v0, const float v1, const float a) {
@@ -132,10 +146,12 @@ void StepperGenerator::insert_section(uint16_t arr, uint16_t rcr, bool is_accele
     if (is_acceleration) {
         acceleration_mem.emplace_back(arr -1);
         acceleration_mem.emplace_back(rcr -1);
+        acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding, 0);
         acceleration_mem.emplace_back(arr / 2 -1);
     } else {
         // needs to be put in reverse
-        deceleration_mem.emplace_back(arr / 2 -1);        
+        deceleration_mem.emplace_back(arr / 2 -1);
+        deceleration_mem.insert(deceleration_mem.end(), dma_burst_padding, 0);        
         deceleration_mem.emplace_back(rcr -1);
         deceleration_mem.emplace_back(arr -1);
     }
@@ -146,11 +162,9 @@ void StepperGenerator::finalize_dma(uint16_t arr) {
     this->ratio = 1.0f;
 
     acceleration_mem.emplace_back(arr);
-    acceleration_mem.emplace_back(0);
-    acceleration_mem.emplace_back(0);
+    acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding + 2, 0);
     acceleration_mem.emplace_back(arr);
-    acceleration_mem.emplace_back(0);
-    acceleration_mem.emplace_back(0);
+    acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding + 2, 0);
 }
 
 void StepperGenerator::generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration) {
@@ -195,6 +209,7 @@ status StepperGenerator::prepare_dma(int32_t steps, float ratio) {
         return status::error;
     }
 
+    set_direction(steps > 0);
     steps = std::abs(steps);
     acceleration_mem.clear();
     deceleration_mem.clear();
@@ -227,13 +242,13 @@ status StepperGenerator::start() {
 
     _state = motor_state::BUSY;
 
-    auto retval = HAL_TIM_PWM_Start(&_htim, _channel);
+    auto retval = HAL_TIM_PWM_Start(&pins.htim, pins.channel);
     if (HAL_OK != retval) {
         cube_hw::log_info("stepper_generator: Failed to start PWM on TIM8 with rv:%d\n", retval);
         return status::error;
     }
 
-    retval = HAL_TIM_DMABurst_MultiWriteStart(&_htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)acceleration_mem.data(), TIM_DMABURSTLENGTH_3TRANSFERS, acceleration_mem.size());
+    retval = HAL_TIM_DMABurst_MultiWriteStart(&pins.htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)acceleration_mem.data(), dma_burst_length, acceleration_mem.size());
     if (HAL_OK != retval) {
         cube_hw::log_info("stepper_generator: Failed to start DMA PWM with rv:%d\n", retval);
         return status::error;
@@ -248,6 +263,7 @@ status StepperGenerator::do_velocity(float speed) {
         return status::error;
     }
 
+    set_direction(speed > 0);
     speed = abs(speed);
     if (speed < MIN_VELOCITY || speed > MAX_VELOCITY) {
         cube_hw::log_error("stepper_generator: velocity speed out of range\n");
@@ -256,10 +272,10 @@ status StepperGenerator::do_velocity(float speed) {
 
     _state = motor_state::VELOCITY;
     const uint16_t arr = get_arr(speed);
-    _htim.Instance->ARR = arr - 1;
-    _htim.Instance->CCR1 = arr / 2;
+    __HAL_TIM_SET_AUTORELOAD(&pins.htim, arr);
+    __HAL_TIM_SET_COMPARE(&pins.htim, pins.channel, arr / 2);
 
-    auto retval = HAL_TIM_PWM_Start(&_htim, _channel);
+    auto retval = HAL_TIM_PWM_Start(&pins.htim, pins.channel);
     if (HAL_OK != retval) {
         cube_hw::log_info("stepper_generator: Failed to start PWM on TIM8 with rv:%d\n", retval);
         return status::error;

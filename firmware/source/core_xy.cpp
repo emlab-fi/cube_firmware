@@ -15,41 +15,38 @@ CoreXY::CoreXY(StepperGenerator& motor_x, StepperGenerator& motor_y) :
     motor_y(motor_y) {}
 
 void CoreXY::move(int32_t x, int32_t y) {
-    motor_x.set_direction(x > 0, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
-    motor_y.set_direction(y > 0, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
-    
-    x = std::abs(x);
-    y = std::abs(y);
+    const auto x_abs = std::abs(x);
+    const auto y_abs = std::abs(y);
     float ratio = 1.0f;
     if (x != 0 || y != 0)
-        ratio = x > y ? static_cast<float>(y) / x : static_cast<float>(x) / y;
+        ratio = x_abs > y_abs ? static_cast<float>(y_abs) / x_abs : static_cast<float>(x_abs) / y_abs;
 
-    motor_x.prepare_dma(x, x > y ? 1.0 : ratio);
-    motor_y.prepare_dma(y, y > x ? 1.0 : ratio);
+    motor_x.prepare_dma(x, x_abs > y_abs ? 1.0 : ratio);
+    motor_y.prepare_dma(y, y_abs > x_abs ? 1.0 : ratio);
 
     motor_x.start();
     motor_y.start();
 }
 
 bool CoreXY::is_idle() const {
-    return motor_x.state() == motor_state::IDLE &&  motor_y.state() == motor_state::IDLE;
+    return motor_x.state() == motor_state::IDLE && motor_y.state() == motor_state::IDLE;
 }
 
 void CoreXY::home() {
-    // Home X
-    angle = PI; // 180
-    motor_x.set_direction(false, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
-    motor_y.set_direction(false, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
-    motor_x.do_velocity(HOMING_SPEED);
-    motor_y.do_velocity(HOMING_SPEED);
-    while(!is_idle());
-
-    // Home Y
-    angle = PI + PI_HALF; // 270
-    motor_x.set_direction(false, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
-    motor_y.set_direction(true, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
-    motor_x.do_velocity(HOMING_SPEED);
-    motor_y.do_velocity(HOMING_SPEED);
+    if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_X_START) == GPIO_PinState::GPIO_PIN_SET) {
+        // Home X
+        angle = PI; // 180
+        motor_x.do_velocity(-HOMING_SPEED);
+        motor_y.do_velocity(-HOMING_SPEED);
+        while(!is_idle());
+    }
+    
+    if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_Y_START) == GPIO_PinState::GPIO_PIN_SET) {
+        // Home Y
+        angle = PI + PI_HALF; // 270
+        motor_x.do_velocity(-HOMING_SPEED);
+        motor_y.do_velocity(HOMING_SPEED);
+    }
 }
 
 void CoreXY::limit_hit(const uint16_t limit) {

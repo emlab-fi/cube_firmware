@@ -54,15 +54,24 @@ uint8_t limits_status() {
 
 
 status do_steps(int32_t a, int32_t b, int32_t c) {
-    // stepper_generator_z.set_direction(c > 0, DIR3_OUT_GPIO_Port, DIR3_OUT_Pin);
-    // stepper_generator_z.prepare_dma(z);
-    //stepper_generator_z.start();
+    stepper_generator_z.prepare_dma(c);
+    stepper_generator_z.start();
 
     core_xy.move(a, b);
 
     // busy wait
-    while(!core_xy.is_idle()); // && stepper_generator_z.state() != motor_state::IDLE);
+    while(!core_xy.is_idle() && stepper_generator_z.state() != motor_state::IDLE);
+    return status::no_error;
+}
 
+status home() {
+    if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_Z_START) == GPIO_PinState::GPIO_PIN_SET) {
+        stepper_generator_z.do_velocity(-HOMING_SPEED);
+    }
+    core_xy.home();
+
+    // busy wait
+    while(!core_xy.is_idle() || stepper_generator_z.state() != motor_state::IDLE);
     return status::no_error;
 }
 

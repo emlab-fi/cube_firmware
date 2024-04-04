@@ -11,6 +11,7 @@ extern "C" {
 #define DEBUG_LED5_GPIO_Port GPIOE
 #define DEBUG_LED6_Pin GPIO_PIN_5
 #define DEBUG_LED6_GPIO_Port GPIOE
+#define LIMIT_GPIO_BASE GPIOE
 #define IO1_Pin GPIO_PIN_6
 #define IO1_GPIO_Port GPIOE
 #define STEP_OUT1_Pin GPIO_PIN_0

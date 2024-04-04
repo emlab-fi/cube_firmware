@@ -16,12 +16,17 @@ DMA_HandleTypeDef hdma_tim8_up;
 DMA_HandleTypeDef hdma_tim20_up;
 
 cube_hw::TMC2209 tmc_driver_x(0x00, ENABLE_OUT1_GPIO_Port, ENABLE_OUT1_Pin);
-cube_hw::TMC2209 tmc_driver_y(0x01, ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin);
-cube_hw::TMC2209 tmc_driver_z1(0x02, ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin);
-cube_hw::TMC2209 tmc_driver_z2(0x03, ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin);
+cube_hw::TMC2209 tmc_driver_y(0x03, ENABLE_OUT4_GPIO_Port, ENABLE_OUT4_Pin);
+cube_hw::TMC2209 tmc_driver_z1(0x01, ENABLE_OUT2_GPIO_Port, ENABLE_OUT2_Pin); 
+cube_hw::TMC2209 tmc_driver_z2(0x02, ENABLE_OUT3_GPIO_Port, ENABLE_OUT3_Pin);
 
-cube_hw::StepperGenerator stepper_generator_x(htim1, TIM_CHANNEL_1, planner_conf.step_resolution_a);
-cube_hw::StepperGenerator stepper_generator_y(htim8, TIM_CHANNEL_1, planner_conf.step_resolution_b);
+cube_hw::MotorPins motor_x_pins(htim1, TIM_CHANNEL_1, DIR1_OUT_GPIO_Port, DIR1_OUT_Pin);
+cube_hw::MotorPins motor_y_pins(htim20, TIM_CHANNEL_2, DIR4_OUT_GPIO_Port, DIR4_OUT_Pin);
+cube_hw::MotorPins motor_z_pins(htim8, TIM_CHANNEL_1, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
+
+cube_hw::StepperGenerator stepper_generator_x(motor_x_pins, planner_conf.step_resolution_a);
+cube_hw::StepperGenerator stepper_generator_y(motor_y_pins, planner_conf.step_resolution_b);
+cube_hw::StepperGenerator stepper_generator_z(motor_z_pins, planner_conf.step_resolution_c);
 
 cube_hw::CoreXY core_xy(stepper_generator_x, stepper_generator_y);
 
@@ -389,7 +394,7 @@ void MX_GPIO_Init(void)
                           |DEBUG_LED1_Pin|DEBUG_LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, STEP_OUT1_Pin|STEP_OUT4_Pin|STEP_OUT2_Pin|STEP_OUT3_Pin, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOC, STEP_OUT1_Pin|STEP_OUT4_Pin|STEP_OUT2_Pin|STEP_OUT3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, ENABLE_OUT1_Pin|ENABLE_OUT2_Pin|ENABLE_OUT3_Pin|ENABLE_OUT4_Pin
@@ -415,7 +420,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PCPin PCPin PCPin PCPin */
-  GPIO_InitStruct.Pin = STEP_OUT1_Pin|STEP_OUT4_Pin|STEP_OUT2_Pin|STEP_OUT3_Pin;
+GPIO_InitStruct.Pin = STEP_OUT1_Pin|STEP_OUT4_Pin|STEP_OUT2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -424,14 +429,14 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : PDPin PDPin PDPin PDPin
                            PDPin PDPin PDPin PDPin */
   GPIO_InitStruct.Pin = ENABLE_OUT1_Pin|ENABLE_OUT2_Pin|ENABLE_OUT3_Pin|ENABLE_OUT4_Pin
-                          |DIR1_OUT_Pin|DIR2_OUT_Pin|DIR3_OUT_Pin|DIR4_OUT_Pin;
+                          |DIR1_OUT_Pin|DIR2_OUT_Pin|DIR4_OUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PDPin PDPin PDPin PDPin */
-  GPIO_InitStruct.Pin = DIAG_IN1_Pin|DIAG_IN2_Pin|DIAG_IN3_Pin|DIAG_IN4_Pin;
+  GPIO_InitStruct.Pin = DIAG_IN1_Pin|DIAG_IN2_Pin|DIAG_IN3_Pin|DIAG_IN4_Pin|DIR3_OUT_Pin|STEP_OUT3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
