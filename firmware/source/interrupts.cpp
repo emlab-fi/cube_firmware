@@ -11,6 +11,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if (htim == stepper_generator_y.htim()) {
     stepper_generator_y.finished_callback();
   }
+  if (htim == stepper_generator_z.htim()) {
+    stepper_generator_z.finished_callback();
+  }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -20,6 +23,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     case LIMIT_Y_START:
     case LIMIT_Y_STOP:
       core_xy.limit_hit(GPIO_Pin);
+      break;
+    case LIMIT_Z_START:
+    case LIMIT_Z_STOP:
+      stepper_generator_z.limit_hit();
       break;
     default:
       break;

@@ -49,10 +49,9 @@ extern cube_hw::StepperGenerator stepper_generator_x;
 /// @brief step signal generator for second CoreXY motor
 extern cube_hw::StepperGenerator stepper_generator_y;
 /// @brief step signal generator for z axis motor
-//extern cube_hw::StepperGenerator stepper_generator_z;
+extern cube_hw::StepperGenerator stepper_generator_z;
 
 extern cube_hw::CoreXY core_xy;
-
 
 constexpr uint16_t LIMIT_X_STOP = IO1_Pin;
 constexpr uint16_t LIMIT_X_START = IO2_Pin;

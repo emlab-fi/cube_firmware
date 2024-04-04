@@ -18,13 +18,13 @@ int main(void) {
 
     MX_GPIO_Init();
     MX_DMA_Init();
-    MX_I2C3_Init();
-    MX_USART1_UART_Init();
-    MX_USART2_UART_Init();
-    MX_USART3_UART_Init();
     MX_TIM1_Init();
+    MX_USART1_UART_Init();
     MX_TIM8_Init();
     MX_TIM20_Init();
+    MX_I2C3_Init();
+    MX_USART2_UART_Init();
+    MX_USART3_UART_Init();
 
     if (tmc_driver_x.configure() != cube_hw::status::no_error ||
         tmc_driver_y.configure() != cube_hw::status::no_error ||
@@ -35,7 +35,8 @@ int main(void) {
     }
 
     if (stepper_generator_x.start_tim_base() != cube_hw::status::no_error ||
-        stepper_generator_y.start_tim_base() != cube_hw::status::no_error) {
+        stepper_generator_y.start_tim_base() != cube_hw::status::no_error ||
+        stepper_generator_z.start_tim_base() != cube_hw::status::no_error ) {
         cube_hw::log_error("Failed to start timers");
         Error_Handler();
     }
