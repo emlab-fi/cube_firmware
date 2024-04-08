@@ -21,6 +21,7 @@ status set_motor_power(bool enabled) {
     return status::no_error;
 }
 
+// not used anymore
 uint8_t limits_status() {
     log_info("cube_hw: reading limit switches\n");
     uint8_t pin_state = 0U;
@@ -65,10 +66,16 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
 }
 
 status home() {
+    status core_result, vertical_result;
+
     if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_Z_START) == GPIO_PinState::GPIO_PIN_SET) {
-        stepper_generator_z.do_velocity(-HOMING_SPEED);
+        vertical_result = stepper_generator_z.do_velocity(-VerticalConfig.homing_velocity);
     }
-    core_xy.home();
+
+    core_result = core_xy.home();
+    if (vertical_result != status::no_error || core_result != status::no_error) {
+        return status::error;
+    }
 
     // busy wait
     while(!core_xy.is_idle() || stepper_generator_z.state() != motor_state::IDLE);
@@ -77,6 +84,9 @@ status home() {
 
 status do_velocity(int32_t a, int32_t b, int32_t c) { return status::error; }
 
-status reset_pos() { return status::error; }
+status reset_pos() {
+    // nothing to do 
+    return status::no_error;
+}
 
 } //namespace cube_hw

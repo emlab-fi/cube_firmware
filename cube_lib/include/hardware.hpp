@@ -58,6 +58,10 @@ status get_param(uint32_t index, uint32_t& value);
 /// @param a,b,c direction is set by param sign
 status do_steps(int32_t a, int32_t b, int32_t c);
 
+/// @brief moves each of the axis to the home location
+status home();
+
+/// @brief not currently implemented () 
 status do_velocity(int32_t a, int32_t b, int32_t c);
 
 status reset_pos();

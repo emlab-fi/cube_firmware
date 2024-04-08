@@ -71,27 +71,13 @@ void controller::instr_move(uint32_t id, point* target) {
 
 
 void controller::instr_home(uint32_t id) {
-    constexpr int32_t VELOCITY = 200;
     cube_hw::log_info("cube_lib::controller: homing procedure started\n");
 
     //turn on motors
     scoped_motor_power pwr{};
 
-    cube_hw::status status;
-
     cube_hw::log_info("cube_lib::controller: homing Y\n");
-
-    switch(motion_planner.get_machine()) {
-        case planner_machine::cartesian:
-            status = cube_hw::do_velocity(0, -VELOCITY, 0);
-            break;
-        case planner_machine::corexy:
-            status = cube_hw::do_velocity(-VELOCITY, VELOCITY, 0);
-            break;
-        default:
-            status = cube_hw::status::error;
-            cube_hw::log_error("cube_lib::controller: unknown machine model\n");
-    }
+    auto status = cube_hw::home();
 
     if (status != cube_hw::status::no_error) {
         cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
@@ -99,78 +85,7 @@ void controller::instr_home(uint32_t id) {
         return;
     }
 
-    wait_on_limit(cube_hw::B_LIMIT_START);
-
-    status = cube_hw::do_velocity(0, 0, 0);
-    
-    if (status != cube_hw::status::no_error) {
-        cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
-        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 1));
-        return;
-    }
-
-    cube_hw::log_info("cube_lib::controller: homing X\n");
-
-    switch(motion_planner.get_machine()) {
-        case planner_machine::cartesian:
-            status = cube_hw::do_velocity(-VELOCITY, 0, 0);
-            break;
-        case planner_machine::corexy:
-            status = cube_hw::do_velocity(-VELOCITY, -VELOCITY, 0);
-            break;
-        default:
-            status = cube_hw::status::error;
-            cube_hw::log_error("cube_lib::controller: unknown machine model\n");
-    }
-
-    if (status != cube_hw::status::no_error) {
-        cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
-        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 1));
-        return;
-    }
-
-    wait_on_limit(cube_hw::A_LIMIT_START);
-
-    status = cube_hw::do_velocity(0, 0, 0);
-    
-    if (status != cube_hw::status::no_error) {
-        cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
-        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 1));
-        return;
-    }
-
-    cube_hw::log_info("cube_lib::controller: homing Z\n");
-    
-    switch(motion_planner.get_machine()) {
-        case planner_machine::cartesian:
-            status = cube_hw::do_velocity(0, 0, -VELOCITY);
-            break;
-        case planner_machine::corexy:
-            status = cube_hw::do_velocity(0, 0, -VELOCITY);
-            break;
-        default:
-            status = cube_hw::status::error;
-            cube_hw::log_error("cube_lib::controller: unknown machine model\n");
-    }
-
-    if (status != cube_hw::status::no_error) {
-        cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
-        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 1));
-        return;
-    }
-
-    wait_on_limit(cube_hw::C_LIMIT_START);
-
-    status = cube_hw::do_velocity(0, 0, 0);
-    
-    if (status != cube_hw::status::no_error) {
-        cube_hw::log_error("cube_lib::controller: HW fail in velocity mode\n");
-        send_simple_reply(id, error_code(error::cube, error::cat::hw_movement, 1));
-        return;
-    }
-
-    cube_hw::log_info("cube_lib::controller: resetting internal positions\n");
-    
+    cube_hw::log_info("cube_lib::controller: resetting internal positions\n");    
     motion_planner.reset_absolute_pos();
     motion_planner.reset_zero_pos();
     status = cube_hw::reset_pos();
@@ -183,8 +98,6 @@ void controller::instr_home(uint32_t id) {
 
     cube_hw::log_info("cube_lib::controller: homing OK\n");
     send_simple_reply(id, 0);
-
-    return;
 }
 
 } //namespace cube

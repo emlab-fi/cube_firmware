@@ -10,9 +10,12 @@ class CoreXY {
 
 public:
     CoreXY(StepperGenerator& motor_x, StepperGenerator& motor_y);
-    void move(const int32_t x, const int32_t y);
+
+    /// @brief set generator parameter
+    status set_param(uint32_t index, uint32_t value);
+    status move(const int32_t x, const int32_t y);
     bool is_idle() const;
-    void home();
+    status home();
     void limit_hit(const uint16_t limit);
 };
 
