@@ -24,9 +24,9 @@ cube_hw::MotorPins motor_x_pins(htim1, TIM_CHANNEL_1, DIR1_OUT_GPIO_Port, DIR1_O
 cube_hw::MotorPins motor_y_pins(htim20, TIM_CHANNEL_2, DIR4_OUT_GPIO_Port, DIR4_OUT_Pin);
 cube_hw::MotorPins motor_z_pins(htim8, TIM_CHANNEL_1, DIR2_OUT_GPIO_Port, DIR2_OUT_Pin);
 
-cube_hw::StepperGenerator stepper_generator_x(motor_x_pins, planner_conf.step_resolution_a);
-cube_hw::StepperGenerator stepper_generator_y(motor_y_pins, planner_conf.step_resolution_b);
-cube_hw::StepperGenerator stepper_generator_z(motor_z_pins, planner_conf.step_resolution_c);
+cube_hw::StepperGenerator stepper_generator_x(motor_x_pins, planner_conf.step_resolution_a, CoreConfig);
+cube_hw::StepperGenerator stepper_generator_y(motor_y_pins, planner_conf.step_resolution_b, CoreConfig);
+cube_hw::StepperGenerator stepper_generator_z(motor_z_pins, planner_conf.step_resolution_c, VerticalConfig);
 
 cube_hw::CoreXY core_xy(stepper_generator_x, stepper_generator_y);
 

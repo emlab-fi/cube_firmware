@@ -44,6 +44,7 @@ set(SOURCES
     source/movement.cpp
     source/stepper_generator.cpp
     source/core_xy.cpp
+    source/config.cpp
     source/drivers/mcp23008.cpp
     source/drivers/tmc2209.cpp
     )
