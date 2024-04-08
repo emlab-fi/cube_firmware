@@ -17,6 +17,7 @@ constexpr uint32_t hw_movement = 0x00'05'0000;
 constexpr uint32_t hw_io = 0x00'06'0000;
 constexpr uint32_t hw_misc = 0x00'07'0000;
 constexpr uint32_t misc = 0x00'08'0000;
+constexpr uint32_t param = 0x00'09'0000;
 
 } //namespace cat
 } //namespace error

@@ -1,6 +1,7 @@
 #include "errors.hpp"
 #include "controller.hpp"
 #include "hardware.hpp"
+#include "params.hpp"
 
 namespace cube {
 
@@ -127,6 +128,57 @@ void controller::instr_get_gpio(uint32_t id, gpio_config_payload* data) {
 
     cube_hw::send_message(msg.encode());
     cube_hw::log_info("cube_lib::controller: GPIO read done, sent reply\n");
+}
+
+void controller::instr_set_param(uint32_t id, param_config_payload param) {
+    switch(cube_hw::set_param(param.id, param.value)) {
+    case cube_hw::status::param_nonexistant:
+        cube_hw::log_error("cube_lib::controller: Unknown param id \n");
+        send_simple_reply(id, error_code(error::cube, error::cat::param, 1));
+        break;
+
+    case cube_hw::status::param_set_error:
+        cube_hw::log_error("cube_lib::controller: Invalid param value \n");
+        send_simple_reply(id, error_code(error::cube, error::cat::param, 2));
+        break;
+
+    case cube_hw::status::no_error:
+        send_simple_reply(id, 0);
+        break;
+
+    default:
+        cube_hw::log_error("cube_lib::controller: Param set misc error\n");
+        send_simple_reply(id, error_code(error::cube, error::cat::param, 3));
+        break;
+    }
+}
+
+void controller::instr_get_param(uint32_t id, param_config_payload param) {
+    const auto result = cube_hw::get_param(param.id, param.value);
+
+    if (result == cube_hw::status::param_nonexistant) {
+        cube_hw::log_error("cube_lib::controller: Unknown param id \n");
+        send_simple_reply(id, error_code(error::cube, error::cat::param, 1));
+        return;
+    }
+    else if (result != cube_hw::status::no_error) {
+        cube_hw::log_error("cube_lib::controller: Param read misc error\n");
+        send_simple_reply(id, error_code(error::cube, error::cat::param, 4));
+        return;
+    }
+
+    reply_message msg = {
+        .id = id,
+        .status = {
+            .error_id = 0,
+            .mode = motion_planner.get_mode(),
+            .position = motion_planner.get_relative_pos()
+        },
+        .payload = param.value
+    };
+
+    cube_hw::send_message(msg.encode());
+    cube_hw::log_info("cube_lib::controller: Param read done, sent reply\n");
 }
 
 } //namespace cube

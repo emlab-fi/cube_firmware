@@ -127,10 +127,12 @@ void controller::process_command(encoded_message& input) {
         break;
 
     case instructions::set_parameter:
+        instr_set_param(command.id, *std::get_if<param_config_payload>(&command.payload));
+        break;
+
     case instructions::get_parameter:
-        cube_hw::log_warning("cube_lib::controller: Instruction not implemented\n");
-        send_simple_reply(command.id, error_code(error::cube, error::cat::misc, 2));
-        return;
+        instr_get_param(command.id, *std::get_if<param_config_payload>(&command.payload));
+        break;
 
     default:
         cube_hw::log_error("cube_lib::controller: Fatal error in instr decode\n");

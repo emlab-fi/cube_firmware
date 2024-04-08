@@ -37,7 +37,8 @@ class controller {
     void instr_set_gpio_mode(uint32_t id, gpio_config_payload* data);
     void instr_set_gpio(uint32_t id, gpio_config_payload* data);
     void instr_get_gpio(uint32_t id, gpio_config_payload* data);
-
+    void instr_set_param(uint32_t id, param_config_payload value);
+    void instr_get_param(uint32_t id, param_config_payload value);
 
 public:
 
