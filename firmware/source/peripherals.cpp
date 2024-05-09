@@ -32,6 +32,9 @@ cube_hw::CoreXY core_xy(stepper_generator_x, stepper_generator_y);
 
 // code in here is mainly generated using online tool
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 // low-level main init definition for HAL
 void HAL_MspInit(void)
 {

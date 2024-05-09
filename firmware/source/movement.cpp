@@ -103,7 +103,7 @@ status home() {
     return status::no_error;
 }
 
-status do_velocity(int32_t a, int32_t b, int32_t c) { return status::error; }
+status do_velocity(int32_t , int32_t , int32_t ) { return status::error; }
 
 status reset_pos() {
     // nothing to do 
