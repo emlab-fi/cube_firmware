@@ -108,15 +108,24 @@ bool StepperGenerator::fit_ramp(const unsigned idx, int32_t& steps) {
 }
 
 float StepperGenerator::create_reduced_ramp(const unsigned idx, int32_t& steps) {
-    // sparse brute force
-    for (int reducer = 0; reducer <= 10; ++reducer) {
-        float reduced_target = config.reduced_target(idx, reducer / 10.0f);
+    float reduced_target_prev = config.reduced_target(idx, 0);
+
+    for (int reducer = 0; reducer <= 100; ++reducer) {
+        float reduced_target = config.reduced_target(idx, reducer / 100.0f);
         auto [steps_acc, steps_dec] = ramp_steps(idx, reduced_target);
 
         // constant speed section long enough
         if (constant_steps(reduced_target) + steps_acc + steps_dec > steps) {
+            if (steps_acc + steps_dec > steps) {
+                // would overshoot, use previous values
+                auto [steps_acc_prev, steps_dec_prev] = ramp_steps(idx, reduced_target_prev);
+                steps_acc = steps_acc_prev;
+                steps_dec = steps_dec_prev;
+            }
+            
             const float target_arr = get_arr(reduced_target);
             if (reduced_target == config.start_speed(idx, false)) {
+                // does not have decelerating section
                 steps_acc = std::min(steps_acc, steps);
                 steps -= steps_acc;
                 generate_slope(steps_acc, idx, target_arr);
@@ -127,6 +136,7 @@ float StepperGenerator::create_reduced_ramp(const unsigned idx, int32_t& steps) 
             }
             return reduced_target;
         }
+        reduced_target_prev = reduced_target;
     }
     // should not reach here
     return config.start_speed(idx, ratio);
