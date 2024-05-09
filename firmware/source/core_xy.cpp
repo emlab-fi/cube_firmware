@@ -49,13 +49,14 @@ bool CoreXY::is_idle() const {
 }
 
 status CoreXY::home() {
-    status result_x, result_y;
+    status result_x = status::no_error;
+    status result_y = status::no_error;
 
     if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_X_START) == GPIO_PinState::GPIO_PIN_SET) {
         // Home X
         angle = PI; // 180
-        result_x = motor_x.do_velocity(-CoreConfig.homing_velocity);
-        result_y = motor_y.do_velocity(-CoreConfig.homing_velocity);
+        result_x = motor_x.do_velocity(-CoreConfig.homing_velocity());
+        result_y = motor_y.do_velocity(-CoreConfig.homing_velocity());
 
         if (!no_error(result_x, result_y)) {
             return status::error;
@@ -68,8 +69,8 @@ status CoreXY::home() {
     if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_Y_START) == GPIO_PinState::GPIO_PIN_SET) {
         // Home Y
         angle = PI + PI_HALF; // 270
-        result_x = motor_x.do_velocity(-CoreConfig.homing_velocity);
-        result_y = motor_y.do_velocity(CoreConfig.homing_velocity);
+        result_x = motor_x.do_velocity(-CoreConfig.homing_velocity());
+        result_y = motor_y.do_velocity(CoreConfig.homing_velocity());
     }
 
     return no_error(result_x, result_y) ? status::no_error : status::error;

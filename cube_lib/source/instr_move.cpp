@@ -5,13 +5,12 @@
 namespace {
 
 struct scoped_motor_power {
-
     scoped_motor_power() {
-        cube_hw::set_motor_power(1);
+        cube_hw::set_motor_power(true);
     }
 
     ~scoped_motor_power() {
-        cube_hw::set_motor_power(0);
+        cube_hw::set_motor_power(false);
     }
 };
 

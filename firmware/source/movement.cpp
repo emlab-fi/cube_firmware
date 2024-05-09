@@ -4,10 +4,10 @@
 namespace cube_hw {
 
 status set_motor_power(bool enabled) {
-    tmc_driver_x.set_freewheel(enabled);
-    tmc_driver_y.set_freewheel(enabled);
-    tmc_driver_z1.set_freewheel(enabled);
-    tmc_driver_z2.set_freewheel(enabled);
+    tmc_driver_x.set_freewheel(!enabled);
+    tmc_driver_y.set_freewheel(!enabled);
+    tmc_driver_z1.set_freewheel(!enabled);
+    tmc_driver_z2.set_freewheel(!enabled);
 
     enabled ? log_info("cube_hw: motors enabled\n") : log_info("cube_hw: motors freewheel\n");
     return status::no_error;
@@ -82,15 +82,17 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
     }
 
     // busy wait
-    while(!core_xy.is_idle() && stepper_generator_z.state() != motor_state::IDLE);
+    while(!core_xy.is_idle() || stepper_generator_z.state() != motor_state::IDLE);
+        //log_info("cube_hw: tstep x: %lu\n", tmc_driver_x.get_tstep());
     return status::no_error;
 }
 
 status home() {
-    status core_result, vertical_result;
+    status core_result = status::no_error;
+    status vertical_result = status::no_error;
 
     if (HAL_GPIO_ReadPin(LIMIT_GPIO_BASE, LIMIT_Z_START) == GPIO_PinState::GPIO_PIN_SET) {
-        vertical_result = stepper_generator_z.do_velocity(-VerticalConfig.homing_velocity);
+        vertical_result = stepper_generator_z.do_velocity(-VerticalConfig.homing_velocity());
     }
 
     core_result = core_xy.home();
