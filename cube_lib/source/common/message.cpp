@@ -169,8 +169,8 @@ std::pair<decode_error, command_message> decode_cmd_message(const encoded_messag
         command.payload = gpio_config_payload{message.payload.gpio.index, message.payload.gpio.value};
     }
 
-    if (command.instr == instructions::set_parameter) {
-        command.instr = instructions::set_parameter;
+    if (command.instr == instructions::set_parameter || 
+        command.instr == instructions::get_parameter) {
         if (message.which_payload != command_msg_param_tag) {
             return {decode_error::wrong_payload, {}};
         }
