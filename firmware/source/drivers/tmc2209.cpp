@@ -25,6 +25,7 @@ constexpr uint8_t FACTORY_CONF_REG_ADDR = 0x07; // Freq trim(12Mhz) and Over tem
 
 constexpr uint8_t IHOLD_IRUN_REG_ADDR = 0x10;   // current settings
 constexpr uint8_t TPOWERDOWN_REG_ADDR = 0x11;   // power down delay after stst detection
+constexpr uint8_t TSTEP_REG_ADDR = 0x12;
 constexpr uint8_t TPWMTHRS_REG_ADDR = 0x13;     // automatic switching to chop cycle mode threshold
 
 constexpr uint8_t MSCNT_REG_ADDR = 0x6A;
@@ -43,7 +44,7 @@ TMC2209::TMC2209(const uint8_t address, GPIO_TypeDef* enable_pin_gpio, const uin
     enable_pin_gpio(enable_pin_gpio),
     enable_pin(enable_pin) {}
 
-status TMC2209::configure() {
+status TMC2209::configure(uint32_t mode_tresh) {
     uint8_t read_buffer[4];
 
     set_enable_pin(true);
@@ -59,7 +60,7 @@ status TMC2209::configure() {
     if (set_node_config() != status::no_error ||
         set_general_config() != status::no_error ||
         set_current_config() != status::no_error ||
-        set_stealth_chop_config() != status::no_error)
+        set_stealth_chop_config(mode_tresh) != status::no_error)
         return status::uart_transmit_error;
     
     // check that driver received configuration 
@@ -75,27 +76,36 @@ void TMC2209::set_enable_pin(bool enable) {
     enabled = enable;
 }
 
-status TMC2209::set_freewheel(bool enable) {
-    uint8_t read_buffer[4];
-
-    if (enable && !freewheel) {
-        set_current_config(0, 0);
-        read_reg(PWMCONF_REG_ADDR, read_buffer);
-        read_buffer[2] &= ~0xf0;
-        read_buffer[2] |= 0x10;
-    } else if (!enable && freewheel) {
-        set_current_config();
-        read_reg(PWMCONF_REG_ADDR, read_buffer);
-        read_buffer[2] &= ~0xf0;
+status TMC2209::set_freewheel(bool enable_freewheel) {
+    status retval;
+    // check previous state
+    if (enable_freewheel && !freewheel) {
+        retval = set_current_config(0, 0);
+    } else if (!enable_freewheel && freewheel) {
+        retval = set_current_config();
     } else {
         return status::no_error;
     }
-    freewheel = enable;
 
-    const auto retval = write_reg(PWMCONF_REG_ADDR, read_buffer[0], read_buffer[1], read_buffer[2], read_buffer[3]);
+    if (retval != status::no_error) {
+        return retval;
+    }
+
+    uint8_t read_buffer[4];
+    retval = read_reg(PWMCONF_REG_ADDR, read_buffer);
+    if (retval != status::no_error) {
+        return retval;
+    }
+
+    // bits 21-20: %00=normal; %01=freewheel
+    read_buffer[2] &= ~0xf0;
+    read_buffer[2] |= enable_freewheel ? 0x10 : 0;
+
+    retval = write_reg(PWMCONF_REG_ADDR, read_buffer[0], read_buffer[1], read_buffer[2], read_buffer[3]);
     if (retval != status::no_error)
         return retval;
 
+    freewheel = enable_freewheel;
     return verify_writes();
 }
 
@@ -116,6 +126,14 @@ void TMC2209::append_crc(uint8_t* data, uint8_t bytes) {
             currentByte = currentByte >> 1;
         }
     }
+}
+
+status TMC2209::write_reg(const uint8_t reg_addr, const uint32_t value) {
+    return write_reg(reg_addr, 
+        value & 0xff,
+        (value >> 8) & 0xff,
+        (value >> 16) & 0xff,
+        (value >> 24) & 0xff);
 }
 
 status TMC2209::write_reg(const uint8_t reg_addr, const uint8_t b0, const uint8_t b1, const uint8_t b2, const uint8_t b3) {
@@ -195,7 +213,7 @@ status TMC2209::set_general_config() {
     // byte 1
     // b0 0 -> No filtering of STEP pulses  1 -> Software pulse generator optimization enabled
     // b1 0 -> normal operation             1 -> test mode 
-    constexpr uint8_t b1 = 0b00000001;
+    constexpr uint8_t b1 = 0b00000000;
 
     return write_reg(GCONF_REG_ADDR, b0, b1, 0, 0);
 }
@@ -206,20 +224,36 @@ status TMC2209::set_node_config() {
 }
 
 status TMC2209::set_current_config(const uint8_t stand_still, const uint8_t running) {
-    // currents: num / 32 (5bit)
     //constexpr uint8_t stand_still = 0x0a;   // lowest standstill current
     //constexpr uint8_t running = 0x1f;       // max running current
-    constexpr uint8_t stop_delay = 0x2;     // n * 2^18 clocks
+    constexpr uint8_t stop_delay = 0x3;     // n * 2^18 clocks
 
-    const uint8_t b0 = stand_still | ((running & 0b111) << 5);
-    const uint8_t b1 = (stop_delay << 2) | (running >> 3);
-
-    return write_reg(IHOLD_IRUN_REG_ADDR, b0, b1, 0, 0);
+    return write_reg(IHOLD_IRUN_REG_ADDR, stand_still, running, stop_delay, 0);
 }
 
-status TMC2209::set_stealth_chop_config() {
+status TMC2209::set_stealth_chop_config(uint32_t threshold) {
     // disables switching to spread cycle
-    return write_reg(TPWMTHRS_REG_ADDR, 0, 0, 0, 0);
+    if (threshold == 0) {
+        return write_reg(TPWMTHRS_REG_ADDR, 0, 0, 0, 0);
+    }
+    return write_reg(TPWMTHRS_REG_ADDR, threshold);
+}
+
+uint32_t TMC2209::get_tstep() {
+    uint8_t read_buffer[4];
+    const auto retval = read_reg(TSTEP_REG_ADDR, read_buffer);
+    if (retval != status::no_error)
+        return 0xffffffff;
+
+    return read_buffer[0] | (read_buffer[1] << 8) | (read_buffer[2] << 16);
+}
+
+status TMC2209::set_tpwm_thrs(uint32_t value) {
+    const auto retval = write_reg(TPWMTHRS_REG_ADDR, value);
+    if (retval != status::no_error)
+        return retval;
+
+    return verify_writes();
 }
 
 } // cube_hw

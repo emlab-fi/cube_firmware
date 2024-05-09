@@ -27,6 +27,7 @@ class TMC2209 {
     /// @param b0 lsb
     /// @param b3 msb
     status write_reg(const uint8_t reg_addr, const uint8_t b0, const uint8_t b1, const uint8_t b2, const uint8_t b3);
+    status write_reg(const uint8_t reg_addr, const uint32_t value);
 
     /// @brief read 4B from the specified register
     /// @param result pointer to array of size >= 4
@@ -41,15 +42,17 @@ class TMC2209 {
     void set_enable_pin(bool enable);
     status set_general_config();
     status set_node_config();
-    status set_current_config(const uint8_t stand_still=0xa, const uint8_t running=0x1f);
-    status set_stealth_chop_config();
+    status set_current_config(const uint8_t stand_still=0x5, const uint8_t running=0x10);
+    status set_stealth_chop_config(const uint32_t threshold);
 
 public:
     TMC2209(const uint8_t address, GPIO_TypeDef* enable_pin_gpio, const uint16_t enable_pin);
 
     /// @brief configuration function
-    status configure();
+    status configure(uint32_t mode_tresh = 0);
     status set_freewheel(bool enable);
+    status set_tpwm_thrs(uint32_t value);
+    uint32_t get_tstep();
 };
    
 } // cube_hw
