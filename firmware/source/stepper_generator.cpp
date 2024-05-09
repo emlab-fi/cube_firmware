@@ -69,12 +69,13 @@ void StepperGenerator::set_direction(bool forward) {
 }
 
 int32_t StepperGenerator::acceleration_steps(const float v0, const float v1, const float a) {
-    return static_cast<int32_t>((v1 * v1 - v0 * v0) / (a * 2.0f) * _steps_per_mm);;
+    return static_cast<int32_t>((v1 * v1 - v0 * v0) / (a * 2.0f) * _steps_per_mm);
 }
 
 int32_t StepperGenerator::constant_steps(const float v) {
     // v = s / t
-    return static_cast<int32_t>(v * config.const_speed_t * _steps_per_mm);
+    // s = v * t
+    return static_cast<int32_t>(v * config.const_speed_t() * _steps_per_mm);
 }
 
 uint16_t StepperGenerator::get_arr(const float speed) {
@@ -169,7 +170,7 @@ void StepperGenerator::finalize_dma(uint16_t arr) {
 
 void StepperGenerator::generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration) {
     int32_t steps_done = 0;
-    const float section_duration = std::max(config.section_duration, static_cast<float>(target_arr) / TIM_CLOCK);
+    const float section_duration = std::max(config.section_t(), static_cast<float>(target_arr) / TIM_CLOCK);
     const float speed_increment = (is_acceleration ? config.acceleration(ramp) : config.deceleration(ramp)) * section_duration;
     float speed = std::max(config.start_speed(ramp, is_acceleration), 1.0f);
 
@@ -220,7 +221,7 @@ status StepperGenerator::prepare_dma(int32_t steps, float ratio) {
         ++ramp;
     }
 
-    const float max_speed = ramp < RAMPS ? create_reduced_ramp(ramp, steps) : config.target_speed(ramp - 1);    
+    const float max_speed = ramp < RAMPS ? create_reduced_ramp(ramp, steps) : config.target_speed(ramp - 1);
     if (steps > 0) {
         generate_constant(steps, max_speed);
     }

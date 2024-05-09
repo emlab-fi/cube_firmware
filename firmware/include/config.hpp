@@ -15,67 +15,71 @@ constexpr cube::planner_config planner_conf = {
 namespace cube_hw
 {
 
-constexpr float DEFAULT_CONST_SPEED_T = 0.1f;
-constexpr float DEFAULT_SECTION_DURATION = 0.02f;
-constexpr int32_t TIM_CLOCK = 16000000; // Hz
+constexpr uint32_t DEFAULT_CONST_SPEED_T = 10;  // ms
+constexpr uint32_t DEFAULT_SECTION_T = 20;      // ms
+constexpr int32_t TIM_CLOCK = 16000000;         // Hz
 constexpr int RAMPS = 3;
 
 // non const attributes are configurable
 struct motor_config {
     // Time
-    float const_speed_t = DEFAULT_CONST_SPEED_T;
-    float section_duration = DEFAULT_SECTION_DURATION;
+    uint32_t _const_speed_t = DEFAULT_CONST_SPEED_T;
+    uint32_t _section_t = DEFAULT_SECTION_T;
 
     // Ramping
-    float start_v;
-    float end_v;
-    std::array<float, RAMPS> speed_points;  // section speed id=0x10-0x1f
-    std::array<float, RAMPS> accelerations; // section speed id=0x20-0x2f
-    std::array<float, RAMPS> decelerations; // section speed id=0x30-0x3f
-    float max_speed;
-    float max_acceleration;
+    uint32_t start_v;
+    uint32_t end_v;
+    std::array<uint32_t, RAMPS> speed_points;  // section speed id=0x10-0x1f
+    std::array<uint32_t, RAMPS> accelerations; // section speed id=0x20-0x2f
+    std::array<uint32_t, RAMPS> decelerations; // section speed id=0x30-0x3f
+    uint32_t max_speed;
+    uint32_t max_acceleration;
     
     // Velocity
-    const float homing_velocity;
+    uint32_t _homing_velocity;
     const float min_velocity;
     const float max_velocity;
 
-    // Convenient access
+    // Float access
     float ratio = 1.0f;
-    float start_speed(const unsigned ramp, bool is_acceleration=true);
-    float target_speed(const unsigned ramp);
-    float acceleration(const unsigned ramp);
-    float deceleration(const unsigned ramp);
-    float reduced_target(const unsigned idx, const float reducer);
+    float const_speed_t() const;
+    float section_t() const;
+    float homing_velocity() const;
+    float start_speed(const unsigned ramp, bool is_acceleration=true) const;
+    float target_speed(const unsigned ramp) const;
+    float acceleration(const unsigned ramp) const;
+    float deceleration(const unsigned ramp) const;
+    float reduced_target(const unsigned idx, const float reducer) const;
     
     // Params
+    uint32_t* param(uint32_t param_id);
     status set_param(uint32_t param_id, uint32_t value);
     status get_param(uint32_t param_id, uint32_t& value);
 };
 } // namespace cube_hw
 
 constexpr cube_hw::motor_config CoreConfig = {
-    .start_v = 10.0f,
-    .end_v = 20.0f,
-    .speed_points = {30, 120, 150},
-    .accelerations = {100, 400, 100},
-    .decelerations = {200, 500, 200},
-    .max_speed = 170.0f,
-    .max_acceleration = 700,
-    .homing_velocity = 20.0f,
+    .start_v = 30,
+    .end_v = 40,
+    .speed_points = {70, 160, 200},
+    .accelerations = {300, 800, 300},
+    .decelerations = {400, 900, 400},
+    .max_speed = 1000,
+    .max_acceleration = 2000,
+    ._homing_velocity = 40,
     .min_velocity = 1.0f,
-    .max_velocity = 50.0f
+    .max_velocity = 60.0f,
 };
 
 constexpr cube_hw::motor_config VerticalConfig = {
-    .start_v = 2.0f,
-    .end_v = 4.0f,
+    .start_v = 2,
+    .end_v = 4,
     .speed_points = {4, 12, 15},
     .accelerations = {10, 40, 10},
     .decelerations = {20, 50, 20},
-    .max_speed = 20.0f,
+    .max_speed = 20,
     .max_acceleration = 100,
-    .homing_velocity = 5.0f,
+    ._homing_velocity = 5,
     .min_velocity = 0.1f,
     .max_velocity = 10.0f
 };
