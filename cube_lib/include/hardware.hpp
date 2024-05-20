@@ -7,15 +7,18 @@
 namespace cube_hw {
 
 enum class status {
-    no_error,
-    error,
-    msg_send_error,
+    no_error, ///< status ok
+    error, ///< generic error
+    msg_send_error, ///< incorrect msg type, timeouted or internal uart error
     endstop_triggered,
-    i2c_transfer_error,
+    i2c_transfer_error, ///< timeout or internal I2C error
+    uart_transmit_error,
     spi_transfer_error,
     gpio_set_error,
     gpio_read_error,
-    gpio_wrong_mode
+    gpio_wrong_mode,
+    param_id_invalid,
+    param_set_error
 };
 
 constexpr uint8_t A_LIMIT_START = 0x1U;
@@ -33,14 +36,32 @@ void log_error(const char * fmt, ...);
 
 status init_hardware();
 
+/// @brief get received message
+/// @returns newest encoded_message or nullopt if no messages present 
 std::optional<cube::encoded_message> get_message();
 
+
+/// @brief attempts to send encoded message
+/// @param encoded_message to be sent
 status send_message(const cube::encoded_message& msg);
 
+/// @brief enables driving current or freewheel mode
 status set_motor_power(bool enabled);
 
+/// @brief set hardware param corrsponding to provided index
+status set_param(uint32_t index, uint32_t value);
+
+/// @brief get hardware param corrsponding to provided index
+status get_param(uint32_t index, uint32_t& value);
+
+/// @brief executes given number of steps for each axis
+/// @param a,b,c direction is set by param sign
 status do_steps(int32_t a, int32_t b, int32_t c);
 
+/// @brief moves each of the axis to the home location
+status home();
+
+/// @brief not currently implemented () 
 status do_velocity(int32_t a, int32_t b, int32_t c);
 
 status reset_pos();

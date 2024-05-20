@@ -18,7 +18,7 @@ struct coordinate {
 
     coordinate(coordinate&& other) = default;
 
-    coordinate(const float x, const float y, const float z) : data({x, y, z}) {}
+    constexpr coordinate(const float x, const float y, const float z) : data({x, y, z}) {}
 
     coordinate(std::initializer_list<float> input) {
         auto iter = input.begin();
@@ -138,7 +138,7 @@ struct point {
 
     point(point&& other) = default;
 
-    point(float x, float y, float z) : coords(x, y, z) {}
+    constexpr point(float x, float y, float z) : coords(x, y, z) {}
 
     point(std::initializer_list<float> input) : coords(input) {}
 

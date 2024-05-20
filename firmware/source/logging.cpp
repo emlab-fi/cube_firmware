@@ -5,7 +5,7 @@
 
 extern "C" {
 // do nothing implementation for tiny printf
-void _putchar(char character) {
+void _putchar(char) {
   return;
 }
 

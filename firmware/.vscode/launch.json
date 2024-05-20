@@ -19,7 +19,7 @@
                 "monitor halt",
                 "monitor flash write_image erase ./build/cube_firmware.elf"
             ],
-            "runToMain": true
+            "runToEntryPoint": "main"
         }
     ]
 }

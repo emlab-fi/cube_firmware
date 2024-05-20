@@ -11,7 +11,7 @@ we basically just shim the regular interrupt
 */
 void USART1_IRQHandler(void) {
 
-  //if the interrupt is RXNE, call our handler on that
+  //if the interrupt is RXNE(Receive Data Register Not Empty), call our handler on that
   if (__HAL_UART_GET_IT(&data_uart, UART_IT_RXNE)) {
       uint8_t data = data_uart.Instance->RDR;
       receive_buffer.new_byte(data);
@@ -66,7 +66,5 @@ status send_message(const cube::encoded_message& msg) {
 
     return status::no_error;
 }
-
-
 
 } //namespace cube_hw
