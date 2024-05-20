@@ -22,6 +22,9 @@ StepperGenerator::StepperGenerator(const MotorPins& pins, unsigned steps_for_mm,
         case TIM_CHANNEL_5: dma_burst_padding = 4; dma_burst_length = TIM_DMABurstLength_7Transfers; break;
         case TIM_CHANNEL_6: dma_burst_padding = 5; dma_burst_length = TIM_DMABurstLength_8Transfers; break;
     }
+    int frame_size = 3 + dma_burst_padding;
+    acceleration_mem.resize(DMA_FRAMES_MAX  * frame_size);
+    deceleration_mem.resize(DMA_FRAMES_MAX  * frame_size / 2);
 }
 
 status StepperGenerator::start_tim_base() {
@@ -145,27 +148,31 @@ float StepperGenerator::create_reduced_ramp(const unsigned idx, int32_t& steps) 
 
 void StepperGenerator::insert_section(uint16_t arr, uint16_t rcr, bool is_acceleration) {
     if (is_acceleration) {
-        acceleration_mem.emplace_back(arr -1);
-        acceleration_mem.emplace_back(rcr -1);
-        acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding, 0);
-        acceleration_mem.emplace_back(arr / 2 -1);
+        acceleration_mem[acc_idx++] = arr -1;
+        acceleration_mem[acc_idx++] = rcr -1;
+        acceleration_mem.insert(acceleration_mem.begin() + acc_idx, dma_burst_padding, 0);
+        acc_idx += dma_burst_padding;
+        acceleration_mem[acc_idx++] = arr / 2 - 1;
     } else {
         // needs to be put in reverse
-        deceleration_mem.emplace_back(arr / 2 -1);
-        deceleration_mem.insert(deceleration_mem.end(), dma_burst_padding, 0);        
-        deceleration_mem.emplace_back(rcr -1);
-        deceleration_mem.emplace_back(arr -1);
+        deceleration_mem[dec_idx++] = arr / 2 - 1;
+        deceleration_mem.insert(deceleration_mem.begin() + dec_idx, dma_burst_padding, 0);        
+        dec_idx += dma_burst_padding;
+        deceleration_mem[dec_idx++] = rcr -1;
+        deceleration_mem[dec_idx++] = arr -1;
     }
 }
 
 void StepperGenerator::finalize_dma(uint16_t arr) {
-    acceleration_mem.insert(acceleration_mem.end(), deceleration_mem.rbegin(), deceleration_mem.rend());
-
+    acceleration_mem.insert(acceleration_mem.begin() + acc_idx, deceleration_mem.rend() - dec_idx, deceleration_mem.rend());
+    acc_idx += dec_idx;
     //padding
-    acceleration_mem.emplace_back(arr);
-    acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding + 2, 0);
-    acceleration_mem.emplace_back(arr);
-    acceleration_mem.insert(acceleration_mem.end(), dma_burst_padding + 2, 0);
+    acceleration_mem[acc_idx++] = arr;
+    acceleration_mem.insert(acceleration_mem.begin() + acc_idx, dma_burst_padding + 2, 0);
+    acc_idx += dma_burst_padding + 2;
+    acceleration_mem[acc_idx++] = arr;
+    acceleration_mem.insert(acceleration_mem.begin() + acc_idx, dma_burst_padding + 2, 0);
+    acc_idx += dma_burst_padding + 2;
 }
 
 void StepperGenerator::generate_slope(const int32_t steps, const unsigned ramp, const uint16_t target_arr, bool is_acceleration) {
@@ -212,8 +219,8 @@ status StepperGenerator::prepare_dma(int32_t steps, float ratio) {
 
     set_direction(steps > 0);
     steps = std::abs(steps);
-    acceleration_mem.clear();
-    deceleration_mem.clear();
+    acc_idx = 0;
+    dec_idx = 0;
     config.ratio = ratio;
 
     int ramp = 0;
@@ -250,7 +257,7 @@ status StepperGenerator::start() {
         return status::error;
     }
 
-    retval = HAL_TIM_DMABurst_MultiWriteStart(&pins.htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)acceleration_mem.data(), dma_burst_length, acceleration_mem.size());
+    retval = HAL_TIM_DMABurst_MultiWriteStart(&pins.htim, TIM_DMABASE_ARR, TIM_DMA_UPDATE, (uint32_t*)acceleration_mem.data(), dma_burst_length, acc_idx);
     if (HAL_OK != retval) {
         cube_hw::log_info("stepper_generator: Failed to start DMA PWM with rv:%d\n", retval);
         return status::error;

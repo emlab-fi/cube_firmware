@@ -4,11 +4,10 @@
 #include "config.hpp"
 #include "core_xy.hpp"
 
-
-namespace cube_hw {
-
 constexpr float PI = std::numbers::pi_v<float>;
 constexpr float PI_HALF = PI / 2.0f;
+
+namespace cube_hw {
 
 bool no_error(status x, status y) {
     return x == status::no_error && y == status::no_error;

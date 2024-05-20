@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include "hardware.hpp"
 #include "planner.hpp"
 #include "params.hpp"
@@ -18,6 +19,8 @@ namespace cube_hw
 constexpr uint32_t DEFAULT_CONST_SPEED_T = 10;  // ms
 constexpr uint32_t DEFAULT_SECTION_T = 20;      // ms
 constexpr int32_t TIM_CLOCK = 16000000;         // Hz
+constexpr int DMA_FRAMES_MAX = 350;
+constexpr int DMA_FRAMES_RESERVE = 50;
 constexpr int RAMPS = 3;
 
 // non const attributes are configurable
@@ -50,6 +53,8 @@ struct motor_config {
     float acceleration(const unsigned ramp) const;
     float deceleration(const unsigned ramp) const;
     float reduced_target(const unsigned idx, const float reducer) const;
+
+    int ramp_stairs() const;
     
     // Params
     uint32_t* param(uint32_t param_id);

@@ -83,7 +83,6 @@ status do_steps(int32_t a, int32_t b, int32_t c) {
 
     // busy wait
     while(!core_xy.is_idle() || stepper_generator_z.state() != motor_state::IDLE);
-        //log_info("cube_hw: tstep x: %lu\n", tmc_driver_x.get_tstep());
     return status::no_error;
 }
 

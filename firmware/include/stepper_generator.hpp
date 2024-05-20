@@ -42,6 +42,8 @@ class StepperGenerator {
     motor_config config;
 
     // Dma
+    int acc_idx = 0;
+    int dec_idx = 0;
     std::vector<uint16_t> acceleration_mem;
     std::vector<uint16_t> deceleration_mem;
     void insert_section(uint16_t auto_reload, uint16_t repetition_c, bool is_acceleration=true);

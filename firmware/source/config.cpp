@@ -38,6 +38,17 @@ float motor_config::reduced_target(const unsigned idx, const float reducer) cons
     return v0 + reducer * (v1 - v0);
 }
 
+int motor_config::ramp_stairs() const {
+    int frames = 0;
+    for (int i = 0; i < RAMPS; ++i) {
+        float accel_s = (target_speed(i) - start_speed(i)) / acceleration(i);
+        float decel_s = (target_speed(i) - start_speed(i)) / deceleration(i);
+        frames += static_cast<int>(accel_s / section_t()) + 1;
+        frames += static_cast<int>(decel_s / section_t()) + 1;
+    }
+    return frames;
+}
+
 uint32_t* motor_config::param(uint32_t param_id) {
     const unsigned idx = param_id & 0xf;
     switch (param_id & 0xf0) {
@@ -60,7 +71,13 @@ status motor_config::set_param(uint32_t param_id, uint32_t value) {
     auto parameter = param(param_id);
     
     if (parameter != nullptr) {
-        *parameter = static_cast<float>(value);
+        auto old_value = *parameter;
+        *parameter = value;
+        if (ramp_stairs() > DMA_FRAMES_MAX - DMA_FRAMES_RESERVE) {
+            // this setting would cause buffer overflow
+            *parameter = old_value;
+            return status::param_set_error;
+        }
         return status::no_error;
     }
     return status::param_nonexistant;
