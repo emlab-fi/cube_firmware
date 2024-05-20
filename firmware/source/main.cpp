@@ -26,10 +26,10 @@ int main(void) {
     MX_USART2_UART_Init();
     MX_USART3_UART_Init();
 
-    if (tmc_driver_x.configure(100) != cube_hw::status::no_error ||
-        tmc_driver_y.configure(100) != cube_hw::status::no_error ||
-        tmc_driver_z1.configure(100) != cube_hw::status::no_error ||
-        tmc_driver_z2.configure(100) != cube_hw::status::no_error) {
+    if (tmc_driver_x.configure(130) != cube_hw::status::no_error ||
+        tmc_driver_y.configure(130) != cube_hw::status::no_error ||
+        tmc_driver_z1.configure(130) != cube_hw::status::no_error ||
+        tmc_driver_z2.configure(130) != cube_hw::status::no_error) {
         cube_hw::log_error("Failed to configure TMC drivers\n");
         Error_Handler();
     }

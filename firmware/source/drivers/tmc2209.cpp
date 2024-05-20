@@ -232,8 +232,8 @@ status TMC2209::set_current_config(const uint8_t stand_still, const uint8_t runn
 }
 
 status TMC2209::set_stealth_chop_config(uint32_t threshold) {
-    // disables switching to spread cycle
     if (threshold == 0) {
+        // disables switching to spread cycle
         return write_reg(TPWMTHRS_REG_ADDR, 0, 0, 0, 0);
     }
     return write_reg(TPWMTHRS_REG_ADDR, threshold);

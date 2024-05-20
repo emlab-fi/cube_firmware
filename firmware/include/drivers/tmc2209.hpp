@@ -42,7 +42,7 @@ class TMC2209 {
     void set_enable_pin(bool enable);
     status set_general_config();
     status set_node_config();
-    status set_current_config(const uint8_t stand_still=0x5, const uint8_t running=0x10);
+    status set_current_config(const uint8_t stand_still=0x4, const uint8_t running=0x10);
     status set_stealth_chop_config(const uint32_t threshold);
 
 public:

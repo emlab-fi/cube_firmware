@@ -84,7 +84,7 @@ target_link_libraries(${PROJECT_NAME}
     tiny_printf
     )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions) #-Wall -Wextra -pedantic
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions -Wall -Wextra -pedantic )
 
 stm32_print_size_of_target(${PROJECT_NAME})
 stm32_generate_binary_file(${PROJECT_NAME})

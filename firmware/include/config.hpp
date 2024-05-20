@@ -61,9 +61,9 @@ struct motor_config {
 constexpr cube_hw::motor_config CoreConfig = {
     .start_v = 30,
     .end_v = 40,
-    .speed_points = {70, 160, 200},
-    .accelerations = {300, 800, 300},
-    .decelerations = {400, 900, 400},
+    .speed_points = {60, 120, 150},
+    .accelerations = {150, 450, 200},
+    .decelerations = {200, 500, 250},
     .max_speed = 1000,
     .max_acceleration = 2000,
     ._homing_velocity = 40,
