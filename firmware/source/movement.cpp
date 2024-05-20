@@ -56,7 +56,7 @@ status set_param(uint32_t index, uint32_t value) {
             }
             break;
     }
-    return status::param_nonexistant;
+    return status::param_id_invalid;
 }
 
 status get_param(uint32_t index, uint32_t& value) {
@@ -70,7 +70,7 @@ status get_param(uint32_t index, uint32_t& value) {
             }
             break;
     }
-    return status::param_nonexistant;
+    return status::param_id_invalid;
 }
 
 

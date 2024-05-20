@@ -17,7 +17,7 @@ enum class status {
     gpio_set_error,
     gpio_read_error,
     gpio_wrong_mode,
-    param_nonexistant,
+    param_id_invalid,
     param_set_error
 };
 

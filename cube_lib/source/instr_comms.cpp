@@ -132,7 +132,7 @@ void controller::instr_get_gpio(uint32_t id, gpio_config_payload* data) {
 
 void controller::instr_set_param(uint32_t id, param_config_payload param) {
     switch(cube_hw::set_param(param.id, param.value)) {
-    case cube_hw::status::param_nonexistant:
+    case cube_hw::status::param_id_invalid:
         cube_hw::log_error("cube_lib::controller: Unknown param id \n");
         send_simple_reply(id, error_code(error::cube, error::cat::param, 1));
         break;
@@ -156,7 +156,7 @@ void controller::instr_set_param(uint32_t id, param_config_payload param) {
 void controller::instr_get_param(uint32_t id, param_config_payload param) {
     const auto result = cube_hw::get_param(param.id, param.value);
 
-    if (result == cube_hw::status::param_nonexistant) {
+    if (result == cube_hw::status::param_id_invalid) {
         cube_hw::log_error("cube_lib::controller: Unknown param id \n");
         send_simple_reply(id, error_code(error::cube, error::cat::param, 1));
         return;

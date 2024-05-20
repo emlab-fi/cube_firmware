@@ -80,7 +80,7 @@ status motor_config::set_param(uint32_t param_id, uint32_t value) {
         }
         return status::no_error;
     }
-    return status::param_nonexistant;
+    return status::param_id_invalid;
 }
 
 status motor_config::get_param(uint32_t param_id, uint32_t& value) {
@@ -90,7 +90,7 @@ status motor_config::get_param(uint32_t param_id, uint32_t& value) {
         value = static_cast<uint32_t>(*parameter);
         return status::no_error;
     }
-    return status::param_nonexistant;
+    return status::param_id_invalid;
 }
 
 } // namespace cube_hw
