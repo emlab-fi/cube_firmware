@@ -26,6 +26,11 @@
 			"path": "emulator"
 		},
 		{
+			//Rampin Visualizer
+			"name": "Ramping Visualizer",
+			"path": "tools/ramp_visualizer"
+		},
+		{
 			//Docs
 			"name": "Documentation",
 			"path": "docs"
